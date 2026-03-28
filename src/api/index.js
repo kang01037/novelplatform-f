@@ -13,7 +13,12 @@ export const userApi = {
   register: (data) => api.post('/user/register', data),
   updateUser: (data) => api.put('/user/update', data),
   deleteUser: (userId) => api.delete(`/user/delete/${userId}`),
-  login: (data) => api.post('/user/login', data)
+  login: (data) => api.post('/user/login', data),
+  uploadAvatar: (formData) => api.post('/user/upload/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
 }
 
 // 小说模块

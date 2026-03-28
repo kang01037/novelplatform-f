@@ -60,6 +60,49 @@ const routes = [
     path: '/comment/list/:novelId',
     name: 'CommentList',
     component: () => import('../views/comment/CommentList.vue')
+  },
+  // 作家端路由
+  {
+    path: '/writer/dashboard',
+    name: 'WriterDashboard',
+    component: () => import('../views/writer/WriterDashboard.vue'),
+    meta: { requiresAuth: true, minRole: 2 }
+  },
+  {
+    path: '/writer/novels',
+    name: 'NovelManage',
+    component: () => import('../views/writer/NovelManage.vue'),
+    meta: { requiresAuth: true, minRole: 2 }
+  },
+  {
+    path: '/writer/novel/create',
+    name: 'CreateNovel',
+    component: () => import('../views/writer/NovelCreate.vue'),
+    meta: { requiresAuth: true, minRole: 2 }
+  },
+  {
+    path: '/writer/novel/:novelId/chapters',
+    name: 'ChapterManage',
+    component: () => import('../views/writer/ChapterManage.vue'),
+    meta: { requiresAuth: true, minRole: 2 }
+  },
+  {
+    path: '/writer/chapter/create/:novelId',
+    name: 'ChapterCreate',
+    component: () => import('../views/writer/ChapterEdit.vue'),
+    meta: { requiresAuth: true, minRole: 2 }
+  },
+  {
+    path: '/writer/chapter/edit/:chapterId',
+    name: 'ChapterEdit',
+    component: () => import('../views/writer/ChapterEdit.vue'),
+    meta: { requiresAuth: true, minRole: 2 }
+  },
+  // 无权限页面
+  {
+    path: '/unauthorized',
+    name: 'Unauthorized',
+    component: () => import('../views/Unauthorized.vue')
   }
 ]
 
@@ -73,6 +116,20 @@ const router = createRouter({
     } else {
       return { top: 0 }
     }
+  }
+})
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+  const userStatus = parseInt(localStorage.getItem('userStatus') || '1')
+
+  if (to.meta.requiresAuth && !token) {
+    next('/login')
+  } else if (to.meta.minRole && userStatus < to.meta.minRole) {
+    next('/unauthorized')
+  } else {
+    next()
   }
 })
 
