@@ -36,7 +36,12 @@ export const novelApi = {
   rateNovel: (novelId, data) => api.post(`/novel/${novelId}/rate`, data),
   getHotNovels: (limit = 10) => api.get(`/novel/hot?limit=${limit}`),
   getLatestNovels: (limit = 10) => api.get(`/novel/latest?limit=${limit}`),
-  searchNovels: (novelName) => api.get(`/novel/search?novelName=${novelName}`)
+  searchNovels: (novelName) => api.get(`/novel/search?novelName=${novelName}`),
+  uploadCover: (formData) => api.post('/novel/upload/cover', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
 }
 
 // 章节模块

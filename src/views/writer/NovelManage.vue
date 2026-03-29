@@ -18,6 +18,13 @@ const formatTime = (time) => {
   return new Date(time).toLocaleString('zh-CN')
 }
 
+
+const handleImageError = (event) => {
+  // 图片加载失败时，隐藏 img 元素，显示占位符
+  event.target.style.display = 'none'
+}
+
+
 const loadNovels = async () => {
   try {
     loading.value = true
@@ -62,7 +69,7 @@ onMounted(() => {
     <div v-else class="novel-list">
       <div v-for="novel in novels" :key="novel.novelId" class="novel-item">
         <div class="novel-cover">
-          <img v-if="novel.coverImage" :src="novel.coverImage" :alt="novel.novelName">
+          <img v-if="novel.coverImage && novel.coverImage.trim()" :src="novel.coverImage" :alt="novel.novelName" @error="handleImageError">
           <div v-else class="cover-placeholder">{{ novel.novelName.charAt(0) }}</div>
         </div>
         <div class="novel-info">

@@ -22,8 +22,8 @@
       <button @click="getChapterDetail" class="btn-retry">重试</button>
     </div>
 
-    <div v-else-if="chapter" class="reader-content" :style="readerStyle">
-      <div class="chapter-body">
+    <div v-else-if="chapter" class="reader-content">
+      <div class="chapter-body" :style="{ fontSize: `${fontSize}px` }">
         <h2 class="chapter-title">{{ chapter.chapterTitle }}</h2>
         <div class="chapter-meta">
           <span class="novel-name">📖 {{ chapter.novelName }}</span>
@@ -398,6 +398,15 @@ onMounted(() => {
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 2rem;
+  transition: all 0.3s;
+}
+
+.chapter-body .content {
+  text-indent: 2em;
+  white-space: pre-wrap;
+  line-height: 2.2;
+  font-size: inherit; /* 继承父元素的字体大小 */
+  color: inherit; /* 继承父元素的颜色 */
 }
 
 .chapter-read-container.night-mode .chapter-body {

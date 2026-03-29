@@ -140,7 +140,6 @@ const handleLogin = async () => {
             localStorage.setItem('userStatus', userInfo.userStatus)
             localStorage.setItem('userInfo', JSON.stringify(userInfo))
 
-            alert('登录成功')
             const userStatus = parseInt(userInfo.userStatus)
             if (userStatus >= 3) {
               router.push('/admin/dashboard')

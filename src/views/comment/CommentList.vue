@@ -36,7 +36,15 @@
       <div class="comments">
         <div v-for="comment in comments" :key="comment.commentId" class="comment-item">
           <div class="comment-header">
-            <span class="comment-user">👤 用户{{ comment.userId }}</span>
+            <div class="user-info">
+              <div class="user-avatar">
+                <img v-if="comment.userAvatar" :src="comment.userAvatar" :alt="comment.username">
+                <div v-else class="avatar-placeholder">{{ comment.username?.charAt(0).toUpperCase() }}</div>
+              </div>
+              <div class="user-details">
+                <span class="comment-user">{{ comment.username || '用户' }}</span>
+              </div>
+            </div>
             <span class="comment-time">🕐 {{ formatDate(comment.createdTime) }}</span>
           </div>
           <div class="comment-content">{{ comment.content }}</div>
@@ -69,7 +77,15 @@
           <div v-if="comment.replies && comment.replies.length > 0" class="replies">
             <div v-for="reply in comment.replies" :key="reply.commentId" class="reply-item">
               <div class="reply-header">
-                <span class="reply-user">👤 用户{{ reply.userId }}</span>
+                <div class="user-info">
+                  <div class="user-avatar small">
+                    <img v-if="reply.userAvatar" :src="reply.userAvatar" :alt="reply.username">
+                    <div v-else class="avatar-placeholder small">{{ reply.username?.charAt(0).toUpperCase() }}</div>
+                  </div>
+                  <div class="user-details">
+                    <span class="reply-user">{{ reply.username || '用户' }}</span>
+                  </div>
+                </div>
                 <span class="reply-time">🕐 {{ formatDate(reply.createdTime) }}</span>
               </div>
               <div class="reply-content">{{ reply.content }}</div>
@@ -89,7 +105,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { commentApi } from '../../api'
+import { commentApi, userApi } from '../../api'
 
 const route = useRoute()
 const novelId = route.params.novelId
@@ -101,6 +117,34 @@ const liking = ref(false)
 const newComment = ref({ content: '' })
 const replyCommentId = ref(null)
 const replyContent = ref('')
+const userCache = ref({})
+
+const getUserInfo = async (userId) => {
+  // 如果已经缓存过，直接返回
+  if (userCache.value[userId]) {
+    return userCache.value[userId]
+  }
+
+  try {
+    // 使用 getUser 方法，传入 userId
+    const response = await userApi.getUser(userId)
+    if (response.data.code === 200 || response.data.message === 'success') {
+      const userInfo = response.data.data
+      userCache.value[userId] = {
+        username: userInfo.username || `用户${userId}`,
+        avatar: userInfo.avatar
+      }
+      return userCache.value[userId]
+    }
+  } catch (err) {
+    console.error(`获取用户${userId}信息失败:`, err)
+  }
+
+  return {
+    username: `用户${userId}`,
+    avatar: null
+  }
+}
 
 const getComments = async () => {
   try {
@@ -117,15 +161,27 @@ const getComments = async () => {
       console.log('评论列表:', commentList)
       console.log('评论数量:', commentList.length)
 
-      // 获取每个评论的回复
+      // 获取每个评论的用户名和头像
       for (const comment of commentList) {
+        const userInfo = await getUserInfo(comment.userId)
+        comment.username = userInfo.username
+        comment.userAvatar = userInfo.avatar
+
+        // 获取每个评论的回复
         if (comment.replyCount > 0) {
           try {
             const repliesResponse = await commentApi.getReplies(comment.commentId)
             console.log('回复列表响应:', repliesResponse)
 
             if (repliesResponse.data.code === 200 || repliesResponse.data.message === 'success') {
-              comment.replies = repliesResponse.data.data || []
+              const replies = repliesResponse.data.data || []
+              // 获取回复的用户名和头像
+              for (const reply of replies) {
+                const replyUserInfo = await getUserInfo(reply.userId)
+                reply.username = replyUserInfo.username
+                reply.userAvatar = replyUserInfo.avatar
+              }
+              comment.replies = replies
               console.log(`评论${comment.commentId}的回复:`, comment.replies)
             }
           } catch (replyError) {
@@ -159,6 +215,7 @@ const getComments = async () => {
     loading.value = false
   }
 }
+
 
 const submitComment = async () => {
   if (!newComment.value.content.trim()) {
@@ -263,7 +320,9 @@ const likeComment = async (commentId) => {
     const response = await commentApi.likeComment(commentId)
     console.log('点赞响应:', response)
 
-    if (response.data.code === 200 || response.data.message === 'success') {
+    if (response.data.code === 200 ||
+        response.data.message === 'success' ||
+        response.data.message === '点赞成功') {
       // 更新点赞数
       const updateLikeCount = (commentList) => {
         for (const comment of commentList) {
@@ -285,7 +344,30 @@ const likeComment = async (commentId) => {
     }
   } catch (err) {
     console.error('点赞失败:', err)
-    alert('点赞失败，请稍后重试')
+    if (err.response) {
+      const { code, message } = err.response.data
+      if (code === 200 && message === 'success') {
+        const updateLikeCount = (commentList) => {
+          for (const comment of commentList) {
+            if (comment.commentId === commentId) {
+              comment.likeCount = (comment.likeCount || 0) + 1
+              return true
+            }
+            if (comment.replies) {
+              if (updateLikeCount(comment.replies)) {
+                return true
+              }
+            }
+          }
+          return false
+        }
+        updateLikeCount(comments.value)
+        return
+      }
+      alert(`点赞失败：${message}`)
+    } else {
+      alert('点赞失败，请稍后重试')
+    }
   } finally {
     liking.value = false
   }
@@ -335,6 +417,82 @@ onMounted(() => {
   margin: 0;
   font-size: 1.8rem;
   color: #333;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid #f5f5f5;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.user-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid #fff;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-avatar.small {
+  width: 35px;
+  height: 35px;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.avatar-placeholder.small {
+  font-size: 1rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.comment-user {
+  color: #667eea;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid #f5f5f5;
 }
 
 .comment-count {

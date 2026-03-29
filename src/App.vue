@@ -13,7 +13,6 @@
 
           <!-- 作家显示这些 -->
           <template v-else>
-            <router-link to="/writer/dashboard">作家后台</router-link>
             <router-link to="/writer/novels">我的小说</router-link>
             <router-link to="/writer/novel/create">创建小说</router-link>
           </template>
@@ -142,17 +141,19 @@ const logout = () => {
 }
 
 .header button {
-  background-color: #555;
+  background: none;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
+  font-size: 1rem;
+  font-weight: normal;
 }
 
 .header button:hover {
-  background-color: #666;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .main {

@@ -98,11 +98,6 @@ const saveChapter = async () => {
     return
   }
 
-  if (form.chapterContent.length < 100) {
-    alert('章节内容太短了，至少写 100 字吧~')
-    return
-  }
-
   try {
     saving.value = true
 
@@ -111,36 +106,63 @@ const saveChapter = async () => {
       form.novelId = route.params.novelId
     }
 
+    // 如果没有 novelName，使用默认值
+    if (!form.novelName) {
+      form.novelName = '小说'
+    }
+
     // 自动计算章节号（如果是新建）
     if (!form.chapterNum && !isEdit.value) {
       form.chapterNum = 1 // TODO: 实际应该查询最新章节号 +1
     }
 
+    // 如果没有 wordCount，自动计算
+    if (!form.wordCount) {
+      form.wordCount = form.chapterContent.length
+    }
+
+    console.log('保存章节数据:', form)
+
     const response = isEdit.value
         ? await chapterApi.updateChapter(form)
         : await chapterApi.createChapter(form)
 
-    if (response.data.code === 200 || response.data.message === 'success') {
-      alert('保存成功')
+    console.log('保存响应:', response)
+
+    if (response.data.code === 200 ||
+        response.data.message === 'success' ||
+        response.data.message === '保存成功' ||
+        response.data.message === '章节创建成功' ||
+        response.data.message === '章节更新成功') {
+      alert('✅ 保存成功')
       if (!isEdit.value) {
         isEdit.value = true
-        form.chapterId = response.data.data?.chapterId
+        form.chapterId = response.data.data?.chapterId || form.chapterId
       }
     } else {
       alert(response.data.message || '保存失败')
     }
   } catch (error) {
     console.error('保存失败:', error)
+    // 即使 HTTP 状态码错误，也检查业务逻辑是否成功
     if (error.response) {
-      const { code, message } = error.response.data
-      if (code === 200 && message === 'success') {
-        alert('保存成功')
+      const { code, message, data } = error.response.data
+      console.log('错误响应:', { code, message, data })
+
+      // 如果业务 code 是 200 或消息表示成功，也认为成功
+      if (code === 200 ||
+          message === 'success' ||
+          message === '保存成功' ||
+          message === '章节创建成功' ||
+          message === '章节更新成功') {
+        alert('✅ 保存成功')
         if (!isEdit.value) {
           isEdit.value = true
-          form.chapterId = error.response.data.data?.chapterId
+          form.chapterId = data?.chapterId || form.chapterId
         }
         return
       }
+
       alert(`保存失败：${message || '服务器错误'}`)
     } else if (error.request) {
       alert('保存失败：无法连接到服务器')
@@ -153,13 +175,81 @@ const saveChapter = async () => {
 }
 
 const publishChapter = async () => {
-  if (!confirm('确定要发布章节吗？发布后将无法修改。')) return
+  if (!form.chapterTitle || !form.chapterContent) {
+    alert('请填写章节标题和内容')
+    return
+  }
 
-  await saveChapter()
-  if (form.chapterId) {
-    router.push(`/writer/novel/${form.novelId}/chapters`)
+  try {
+    saving.value = true
+
+    // 如果没有 novelId，从路由获取
+    if (!form.novelId) {
+      form.novelId = route.params.novelId
+    }
+
+    // 如果没有 novelName，使用默认值
+    if (!form.novelName) {
+      form.novelName = '小说'
+    }
+
+    // 自动计算章节号（如果是新建）
+    if (!form.chapterNum && !isEdit.value) {
+      form.chapterNum = 1 // TODO: 实际应该查询最新章节号 +1
+    }
+
+    // 如果没有 wordCount，自动计算
+    if (!form.wordCount) {
+      form.wordCount = form.chapterContent.length
+    }
+
+    console.log('发布章节数据:', form)
+
+    const response = isEdit.value
+        ? await chapterApi.updateChapter(form)
+        : await chapterApi.createChapter(form)
+
+    console.log('发布响应:', response)
+
+    if (response.data.code === 200 ||
+        response.data.message === 'success' ||
+        response.data.message === '发布成功' ||
+        response.data.message === '章节创建成功' ||
+        response.data.message === '章节更新成功') {
+      alert('🎉 发布成功！')
+      router.push(`/writer/novel/${form.novelId}/chapters`)
+    } else {
+      alert(response.data.message || '发布失败')
+    }
+  } catch (error) {
+    console.error('发布失败:', error)
+    // 即使 HTTP 状态码错误，也检查业务逻辑是否成功
+    if (error.response) {
+      const { code, message, data } = error.response.data
+      console.log('错误响应:', { code, message, data })
+
+      // 如果业务 code 是 200 或消息表示成功，也认为成功
+      if (code === 200 ||
+          message === 'success' ||
+          message === '发布成功' ||
+          message === '章节创建成功' ||
+          message === '章节更新成功') {
+        alert('🎉 发布成功！')
+        router.push(`/writer/novel/${form.novelId}/chapters`)
+        return
+      }
+
+      alert(`发布失败：${message || '服务器错误'}`)
+    } else if (error.request) {
+      alert('发布失败：无法连接到服务器')
+    } else {
+      alert(`发布失败：${error.message}`)
+    }
+  } finally {
+    saving.value = false
   }
 }
+
 
 const goBack = () => {
   if (confirm('确定要返回吗？未保存的内容将丢失。')) {

@@ -43,103 +43,71 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-import { novelApi } from '../../api'
+<script setup>import {ref, onMounted} from 'vue'
+import {useRoute} from 'vue-router'
+import {chapterApi, novelApi} from '../../api'
 
-const novels = ref([])
+const route = useRoute()
+const novelId = route.params.novelId
+const chapters = ref([])
 const loading = ref(true)
-
-const formatNumber = (num) => {
-  if (!num && num !== 0) return '0'
-  if (num >= 10000) {
-    return (num / 10000).toFixed(1) + '万'
-  }
-  return num.toString()
-}
+const novelInfo = ref({novelName: ''})
 
 const formatTime = (time) => {
   if (!time) return '未更新'
   return new Date(time).toLocaleString('zh-CN')
 }
 
-const loadNovels = async () => {
+const loadChapters = async () => {
   try {
     loading.value = true
-    const userId = localStorage.getItem('userId')
 
-    if (!userId) {
-      alert('请先登录')
-      return
+    // 先获取小说信息
+    const novelResponse = await novelApi.getNovel(novelId)
+    if (novelResponse.data.code === 200 || novelResponse.data.message === 'success') {
+      novelInfo.value = novelResponse.data.data
     }
 
-    const response = await novelApi.getNovelsByAuthor(userId)
-    if (response.data.code === 200) {
-      novels.value = response.data.data || []
+    // 获取章节列表
+    const response = await chapterApi.getChaptersByNovel(novelId)
+    if (response.data.code === 200 || response.data.message === 'success') {
+      chapters.value = response.data.data || []
     }
   } catch (error) {
-    console.error('加载小说列表失败:', error)
+    console.error('加载章节列表失败:', error)
     alert('加载失败：' + (error.response?.data?.message || error.message))
   } finally {
     loading.value = false
   }
 }
 
+const deleteChapter = async (chapterId) => {
+  if (!confirm('确定要删除这个章节吗？')) return
+
+  try {
+    const response = await chapterApi.deleteChapter(chapterId)
+    if (response.data.code === 200 || response.data.message === 'success') {
+      alert('删除成功')
+      loadChapters()
+    } else {
+      alert(response.data.message || '删除失败')
+    }
+  } catch (error) {
+    console.error('删除章节失败:', error)
+    alert('删除失败，请稍后重试')
+  }
+}
+
+const goBack = () => {
+  window.history.back()
+}
+
 onMounted(() => {
-  loadNovels()
+  loadChapters()
 })
 </script>
 
-<template>
-  <div class="novel-manage">
-    <div class="page-header">
-      <h1>📚 小说管理</h1>
-      <router-link to="/writer/novel/create" class="btn-create">➕ 创建新小说</router-link>
-    </div>
-
-    <div v-if="loading" class="loading">加载中...</div>
-
-    <div v-else-if="novels.length === 0" class="empty-state">
-      <p>暂无作品，快去创作吧！</p>
-      <router-link to="/writer/novel/create" class="btn-create-first">创作第一部小说</router-link>
-    </div>
-
-    <div v-else class="novel-list">
-      <div v-for="novel in novels" :key="novel.novelId" class="novel-item">
-        <div class="novel-cover">
-          <img v-if="novel.coverImage" :src="novel.coverImage" :alt="novel.novelName">
-          <div v-else class="cover-placeholder">{{ novel.novelName.charAt(0) }}</div>
-        </div>
-        <div class="novel-info">
-          <h3 class="novel-title">{{ novel.novelName }}</h3>
-          <p class="novel-desc">{{ novel.content }}</p>
-          <div class="novel-meta">
-            <span class="status-badge" :class="`status-${novel.novelStatus}`">
-              {{ novel.novelStatus === 1 ? '已完结' : novel.novelStatus === 0 ? '连载中' : '暂停' }}
-            </span>
-            <span class="update-time">更新：{{ formatTime(novel.lastUpdateTime) }}</span>
-          </div>
-          <div class="novel-stats">
-            <span>👁️ {{ formatNumber(novel.clickCount) }}</span>
-            <span>⭐ {{ formatNumber(novel.collectCount) }}</span>
-            <span>📊 {{ novel.score?.toFixed(1) || '--' }}</span>
-          </div>
-        </div>
-        <div class="novel-actions">
-          <router-link :to="`/writer/novel/${novel.novelId}/chapters`" class="btn-chapters">
-            📖 章节管理
-          </router-link>
-          <router-link :to="`/novel/detail/${novel.novelId}`" class="btn-detail" target="_blank">
-            👁️ 查看详情
-          </router-link>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<style scoped>
-.novel-manage {
+<style scoped>.chapter-manage {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
@@ -154,8 +122,24 @@ onMounted(() => {
 
 .page-header h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.8rem;
   color: #333;
+}
+
+.btn-back {
+  padding: 0.6rem 1.2rem;
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 1rem;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.btn-back:hover {
+  background: #e0e0e0;
 }
 
 .btn-create {
@@ -210,15 +194,16 @@ onMounted(() => {
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-.novel-list {
+.chapter-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
-.novel-item {
+.chapter-item {
   display: flex;
-  gap: 1.5rem;
+  justify-content: space-between;
+  align-items: center;
   padding: 1.5rem;
   background: white;
   border-radius: 12px;
@@ -226,144 +211,74 @@ onMounted(() => {
   transition: all 0.3s;
 }
 
-.novel-item:hover {
+.chapter-item:hover {
   transform: translateX(5px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
-.novel-cover {
-  width: 120px;
-  height: 160px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.novel-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.cover-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  color: white;
-  font-weight: bold;
-}
-
-.novel-info {
+.chapter-info {
   flex: 1;
-  min-width: 0;
 }
 
-.novel-title {
+.chapter-title {
   margin: 0 0 0.5rem 0;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: bold;
   color: #333;
 }
 
-.novel-desc {
-  margin: 0 0 1rem 0;
-  font-size: 0.95rem;
-  color: #666;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.novel-meta {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.status-badge {
-  padding: 0.3rem 0.8rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.status-0 {
-  background: #e3f2fd;
-  color: #2196F3;
-}
-
-.status-1 {
-  background: #e8f5e9;
-  color: #4CAF50;
-}
-
-.status-2 {
-  background: #fff3e0;
-  color: #ff9800;
-}
-
-.update-time {
-  font-size: 0.85rem;
-  color: #999;
-}
-
-.novel-stats {
+.chapter-meta {
   display: flex;
   gap: 1rem;
   font-size: 0.9rem;
   color: #666;
 }
 
-.novel-actions {
+.chapter-actions {
   display: flex;
-  flex-direction: column;
   gap: 0.5rem;
-  justify-content: center;
 }
 
-.btn-chapters,
-.btn-detail {
+.btn-edit,
+.btn-delete {
   padding: 0.6rem 1.2rem;
   border-radius: 6px;
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 600;
-  text-align: center;
+  border: none;
+  cursor: pointer;
   transition: all 0.3s;
 }
 
-.btn-chapters {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.btn-edit {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
 }
 
-.btn-chapters:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #63408a 100%);
+.btn-edit:hover {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
 }
 
-.btn-detail {
-  background: #f0f0f0;
-  color: #333;
+.btn-delete {
+  background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+  color: white;
 }
 
-.btn-detail:hover {
-  background: #e0e0e0;
+.btn-delete:hover {
+  background: linear-gradient(135deg, #da190b 0%, #c61609 100%);
 }
 
 @media (max-width: 768px) {
-  .novel-item {
+  .chapter-item {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
-  .novel-cover {
+  .chapter-actions {
     width: 100%;
-    height: 200px;
+    justify-content: flex-start;
   }
 }
 </style>

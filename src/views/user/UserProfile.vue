@@ -12,7 +12,6 @@
           </div>
           <div class="avatar-overlay">
             <label for="avatar-upload" class="upload-icon" title="更换头像">
-              📷
             </label>
           </div>
         </div>

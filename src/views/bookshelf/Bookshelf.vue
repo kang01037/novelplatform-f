@@ -4,9 +4,15 @@
     <div v-if="bookshelfItems.length > 0" class="bookshelf-list">
       <div v-for="item in bookshelfItems" :key="item.id" class="bookshelf-item">
         <div class="book-info">
+          <div class="book-cover" v-if="item.novelCover">
+            <img :src="item.novelCover" :alt="item.novelName">
+          </div>
+          <div class="book-cover" v-else>
+            <div class="cover-placeholder">{{ item.novelName?.charAt(0) }}</div>
+          </div>
           <router-link :to="`/novel/detail/${item.novelId}`">
-            <h3>{{ item.novelName }}</h3>
-            <p class="last-read">最后阅读: {{ formatDate(item.lastReadTime) }}</p>
+            <h3>{{ item.novelName || '未知小说' }}</h3>
+            <p class="last-read">最后阅读：{{ formatDate(item.lastReadTime) || '未阅读' }}</p>
           </router-link>
         </div>
         <div class="book-actions">
@@ -29,21 +35,40 @@ const bookshelfItems = ref([])
 
 const getBookshelfItems = async () => {
   try {
-    // 这里假设用户ID为1，实际应用中应该从token中获取
-    const response = await bookshelfApi.getBookshelfByUser(1)
-    if (response.data.code === '200') {
-      const items = response.data.data
+    // 从 localStorage 获取实际登录用户的 ID
+    const userId = localStorage.getItem('userId')
+
+    if (!userId) {
+      alert('请先登录')
+      router.push('/login')
+      return
+    }
+
+    console.log('获取书架列表，userId:', userId)
+    const response = await bookshelfApi.getBookshelfByUser(parseInt(userId))
+    console.log('书架列表响应:', response)
+
+    if (response.data.code === '200' || response.data.message === 'success') {
+      const items = response.data.data || []
+      console.log('书架列表:', items)
+
       // 获取小说名称
       for (const item of items) {
-        const novelResponse = await novelApi.getNovel(item.novelId)
-        if (novelResponse.data.code === '200') {
-          item.novelName = novelResponse.data.data.novelName
+        try {
+          const novelResponse = await novelApi.getNovel(item.novelId)
+          if (novelResponse.data.code === '200' || novelResponse.data.message === 'success') {
+            item.novelName = novelResponse.data.data.novelName
+            item.novelCover = novelResponse.data.data.coverImage
+          }
+        } catch (novelError) {
+          console.error(`获取小说${item.novelId}信息失败:`, novelError)
         }
       }
       bookshelfItems.value = items
     }
   } catch (error) {
     console.error('获取书架失败:', error)
+    alert('获取书架失败，请稍后重试')
   }
 }
 
@@ -65,15 +90,16 @@ const removeFromBookshelf = async (id) => {
   try {
     const item = bookshelfItems.value.find(item => item.id === id)
     if (item) {
+      const userId = localStorage.getItem('userId')
       const response = await bookshelfApi.removeFromBookshelf({
-        userId: 1, // 实际应用中应该从token中获取
+        userId: parseInt(userId),
         novelId: item.novelId
       })
-      if (response.data.code === '200') {
+      if (response.data.code === '200' || response.data.message === 'success') {
         alert('移除成功')
         getBookshelfItems()
       } else {
-        alert(response.data.message)
+        alert(response.data.message || '移除失败')
       }
     }
   } catch (error) {
@@ -116,8 +142,59 @@ h2 {
   align-items: center;
   padding: 1.5rem;
   border-bottom: 1px solid #eee;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
+  gap: 1.5rem;
 }
+
+.bookshelf-item:last-child {
+  border-bottom: none;
+}
+
+.bookshelf-item:hover {
+  background-color: #f9f9f9;
+  transform: translateX(5px);
+}
+
+.book-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.book-cover {
+  width: 80px;
+  height: 100px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.book-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
 
 .bookshelf-item:last-child {
   border-bottom: none;
