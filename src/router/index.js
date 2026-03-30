@@ -61,13 +61,6 @@ const routes = [
     name: 'CommentList',
     component: () => import('../views/comment/CommentList.vue')
   },
-  // 作家端路由
-  {
-    path: '/writer/dashboard',
-    name: 'WriterDashboard',
-    component: () => import('../views/writer/WriterDashboard.vue'),
-    meta: { requiresAuth: true, minRole: 2 }
-  },
   {
     path: '/writer/novels',
     name: 'NovelManage',

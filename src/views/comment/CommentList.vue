@@ -1,7 +1,10 @@
 <template>
   <div class="comment-list-container">
     <div class="page-header">
-      <h2>💬 评论列表</h2>
+      <div class="header-left">
+        <router-link :to="`/novel/detail/${novelId}`" class="btn-back">← 返回小说详情</router-link>
+        <h2>💬 评论列表</h2>
+      </div>
       <div class="comment-count">共 {{ comments.length }} 条评论</div>
     </div>
 
@@ -16,12 +19,12 @@
     </div>
 
     <div v-else-if="comments.length === 0" class="empty-container">
-      <p class="empty-message">😕 暂无评论，快来发表第一条评论吧！</p>
+      <p class="empty-message">暂无评论，快来发表第一条评论吧！</p>
     </div>
 
     <template v-else>
       <div class="comment-form">
-        <h3>📝 发表评论</h3>
+        <h3>发表评论</h3>
         <textarea
             v-model="newComment.content"
             placeholder="请输入评论内容..."
@@ -50,10 +53,10 @@
           <div class="comment-content">{{ comment.content }}</div>
           <div class="comment-footer">
             <button class="btn-action" @click="likeComment(comment.commentId)" :disabled="liking">
-              👍 {{ comment.likeCount || 0 }}
+              点赞 {{ comment.likeCount || 0 }}
             </button>
             <button class="btn-action" @click="showReplyForm(comment.commentId)">
-              💬 回复 ({{ comment.replyCount || 0 }})
+              回复 ({{ comment.replyCount || 0 }})
             </button>
           </div>
 
@@ -166,6 +169,11 @@ const getComments = async () => {
         const userInfo = await getUserInfo(comment.userId)
         comment.username = userInfo.username
         comment.userAvatar = userInfo.avatar
+        console.log(`评论用户信息:`, {
+          userId: comment.userId,
+          username: comment.username,
+          avatar: comment.userAvatar
+        })
 
         // 获取每个评论的回复
         if (comment.replyCount > 0) {
@@ -411,6 +419,29 @@ onMounted(() => {
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid #e0e0e0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.btn-back {
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s;
+  display: inline-block;
+}
+
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 .page-header h2 {
@@ -794,6 +825,12 @@ onMounted(() => {
   }
 
   .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .header-left {
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;

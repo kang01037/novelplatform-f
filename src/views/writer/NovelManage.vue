@@ -55,8 +55,8 @@ onMounted(() => {
 <template>
   <div class="novel-manage">
     <div class="page-header">
-      <h1>📚 小说管理</h1>
-      <router-link to="/writer/novel/create" class="btn-create">➕ 创建新小说</router-link>
+      <h1>小说管理</h1>
+      <router-link to="/writer/novel/create" class="btn-create">创建新小说</router-link>
     </div>
 
     <div v-if="loading" class="loading">加载中...</div>
@@ -82,17 +82,17 @@ onMounted(() => {
             <span class="update-time">更新：{{ formatTime(novel.lastUpdateTime) }}</span>
           </div>
           <div class="novel-stats">
-            <span>👁️ {{ formatNumber(novel.clickCount) }}</span>
-            <span>⭐ {{ formatNumber(novel.collectCount) }}</span>
-            <span>📊 {{ novel.score?.toFixed(1) || '--' }}</span>
+            <span>点击量： {{ formatNumber(novel.clickCount) }}</span>
+            <span>收藏量： {{ formatNumber(novel.collectCount) }}</span>
+            <span>评分： {{ novel.score?.toFixed(1) || '--' }}</span>
           </div>
         </div>
         <div class="novel-actions">
           <router-link :to="`/writer/novel/${novel.novelId}/chapters`" class="btn-chapters">
-            📖 章节管理
+            章节管理
           </router-link>
           <router-link :to="`/novel/detail/${novel.novelId}`" class="btn-detail" target="_blank">
-            👁️ 查看详情
+            查看详情
           </router-link>
         </div>
       </div>
@@ -122,7 +122,7 @@ onMounted(() => {
 
 .btn-create {
   padding: 0.8rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0030ff 0%, #00ebff 100%);
   color: white;
   text-decoration: none;
   border-radius: 8px;
@@ -132,7 +132,7 @@ onMounted(() => {
 
 .btn-create:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(0, 48, 255, 0.4);
 }
 
 .loading {
@@ -159,7 +159,7 @@ onMounted(() => {
 .btn-create-first {
   display: inline-block;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #59ff00 0%, #00ff29 100%);
   color: white;
   text-decoration: none;
   border-radius: 8px;
@@ -169,7 +169,7 @@ onMounted(() => {
 
 .btn-create-first:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(0, 47, 255, 0.4);
 }
 
 .novel-list {
@@ -199,7 +199,7 @@ onMounted(() => {
   flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #00ffd1 0%, #0049ff 100%);
 }
 
 .novel-cover img {
@@ -301,12 +301,12 @@ onMounted(() => {
 }
 
 .btn-chapters {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #48ff00 0%, #00c4ff 100%);
   color: white;
 }
 
 .btn-chapters:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #63408a 100%);
+  background: linear-gradient(135deg, #0081ff 0%, #009eff 100%);
 }
 
 .btn-detail {

@@ -32,10 +32,10 @@
         </div>
         <div class="chapter-actions">
           <router-link :to="`/writer/chapter/edit/${chapter.chapterId}`" class="btn-edit">
-            ✏️ 编辑
+            编辑
           </router-link>
           <button @click="deleteChapter(chapter.chapterId)" class="btn-delete">
-            🗑️ 删除
+            删除
           </button>
         </div>
       </div>

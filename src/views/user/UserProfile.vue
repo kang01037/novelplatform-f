@@ -7,7 +7,7 @@
       <div class="avatar-section">
         <div class="avatar-wrapper">
           <div class="avatar">
-            <img v-if="user.avatar" :src="user.avatar" alt="头像">
+            <img v-if="user.avatar" :src="user.avatar + '?t=' + timestamp" alt="头像">
             <div v-else class="avatar-placeholder">{{ user.nickname?.charAt(0) || user.username?.charAt(0) }}</div>
           </div>
           <div class="avatar-overlay">
@@ -19,7 +19,8 @@
             id="avatar-upload"
             type="file"
             accept="image/*"
-            @change="handleAvatarChange"            style="display: none"
+            @change="handleAvatarChange"
+            style="display: none"
         >
         <div v-if="uploading" class="uploading-tip">
           <span class="loading-spinner"></span>
@@ -28,11 +29,9 @@
 
         <div class="avatar-actions">
           <button v-if="user.avatar" @click="removeAvatar" class="action-btn remove-action">
-            <span class="btn-icon">🗑️</span>
             <span>删除头像</span>
           </button>
           <label for="avatar-upload" class="action-btn upload-action">
-            <span class="btn-icon">📤</span>
             <span>上传新头像</span>
           </label>
         </div>
@@ -137,7 +136,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { userApi } from '../../api'
 
@@ -147,6 +146,7 @@ const loading = ref(true)
 const error = ref('')
 const isEditing = ref(false)
 const uploading = ref(false)
+const timestamp = ref(Date.now())
 
 
 const editForm = reactive({
@@ -306,9 +306,17 @@ const handleAvatarChange = async (event) => {
 
     if (response.data.code === 200 || response.data.message === 'success') {
       const avatarUrl = response.data.data?.avatar || response.data.data
-      // 更新用户头像
+      console.log('头像上传成功，URL:', avatarUrl)
+
+      // 使用 nextTick 确保 DOM 更新
+      await nextTick()
+
+      // 更新用户头像，使用时间戳避免缓存
       user.value.avatar = avatarUrl
+      timestamp.value = Date.now()
+
       alert('头像上传成功')
+
     } else {
       alert(response.data.message || '上传失败')
     }
@@ -319,6 +327,7 @@ const handleAvatarChange = async (event) => {
       if (code === 200 && message === 'success') {
         const avatarUrl = error.response.data.data?.avatar || error.response.data.data
         user.value.avatar = avatarUrl
+        timestamp.value = Date.now()
         alert('头像上传成功')
         return
       }
@@ -339,21 +348,38 @@ const removeAvatar = async () => {
   if (!confirm('确定要删除头像吗？')) return
 
   try {
-    const response = await userApi.updateUser({
-      userId: user.value.userId,
-      username: user.value.username,
-      avatar: null
-    })
+    console.log('删除头像，userId:', user.value.userId)
+
+    // 使用专门的删除头像接口
+    const response = await userApi.deleteAvatar(user.value.userId)
+
+    console.log('删除头像响应:', response)
 
     if (response.data.code === 200 || response.data.message === 'success') {
+      // 删除成功，更新本地数据
       user.value.avatar = null
-      alert('头像已删除')
+      timestamp.value = Date.now()
+      alert('✅ 头像已删除')
     } else {
       alert(response.data.message || '删除失败')
     }
   } catch (error) {
     console.error('删除失败:', error)
-    alert('删除失败，请重试')
+    if (error.response) {
+      console.log('错误响应:', error.response.data)
+      const { code, message } = error.response.data
+      if (code === 200 && message === 'success') {
+        user.value.avatar = null
+        timestamp.value = Date.now()
+        alert('✅ 头像已删除')
+        return
+      }
+      alert(`删除失败：${message || '服务器错误'}`)
+    } else if (error.request) {
+      alert('删除失败：无法连接到服务器')
+    } else {
+      alert(`删除失败：${error.message}`)
+    }
   }
 }
 

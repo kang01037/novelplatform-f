@@ -1,7 +1,7 @@
 <template>
   <div class="novel-list-container">
     <div class="page-header">
-      <h2>📚 小说列表</h2>
+      <h2>小说列表</h2>
       <div class="header-actions">
         <div class="filter-group">
           <select v-model="statusFilter" @change="handleFilter">
@@ -45,7 +45,7 @@
     </div>
 
     <div v-else-if="novels.length === 0" class="empty-container">
-      <p class="empty-message">😕 暂无小说数据</p>
+      <p class="empty-message">暂无小说数据</p>
     </div>
 
     <div v-else class="novel-grid">
@@ -67,24 +67,24 @@
             <p class="novel-desc">{{ novel.content }}</p>
             <div class="novel-meta">
               <span class="last-chapter">
-                📖 {{ novel.lastChapterName || '暂无章节' }}
+                 {{ novel.lastChapterName || '暂无章节' }}
               </span>
             </div>
             <div class="novel-stats">
               <div class="stat-item" title="点击量">
-                <span class="stat-icon">🔥</span>
+                <span class="stat-icon">点击</span>
                 <span class="stat-value">{{ formatNumber(novel.clickCount) }}</span>
               </div>
               <div class="stat-item" title="收藏数">
-                <span class="stat-icon">⭐</span>
+                <span class="stat-icon">收藏</span>
                 <span class="stat-value">{{ formatNumber(novel.collectCount) }}</span>
               </div>
               <div class="stat-item" title="推荐数">
-                <span class="stat-icon">👍</span>
+                <span class="stat-icon">推荐</span>
                 <span class="stat-value">{{ formatNumber(novel.recommendCount) }}</span>
               </div>
               <div class="stat-item" title="评分">
-                <span class="stat-icon">📊</span>
+                <span class="stat-icon">评分</span>
                 <span class="stat-value">{{ novel.score ? novel.score.toFixed(1) : '--' }}</span>
               </div>
             </div>
@@ -320,7 +320,7 @@ onMounted(() => {
 
 .search-box button {
   padding: 0.6rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3bda68 0%, #54ff00 100%);
   color: white;
   border: none;
   border-radius: 6px;

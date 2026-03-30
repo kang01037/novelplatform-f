@@ -18,7 +18,9 @@ export const userApi = {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
-  })
+  }),
+  deleteAvatar: (userId) => api.delete(`/user/avatar/${userId}`)
+
 }
 
 // 小说模块

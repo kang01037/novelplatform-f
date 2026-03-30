@@ -3,14 +3,14 @@
     <div class="page-header">
       <div>
         <button @click="goBack" class="btn-back">← 返回</button>
-        <h1>{{ isEdit ? '✏️ 编辑章节' : '➕ 创建章节' }}</h1>
+        <h1>{{ isEdit ? '编辑章节' : '创建章节' }}</h1>
       </div>
       <div class="header-actions">
         <button @click="saveChapter" class="btn-save" :disabled="saving">
-          {{ saving ? '保存中...' : '💾 保存' }}
+          {{ saving ? '保存中...' : '保存' }}
         </button>
         <button @click="publishChapter" class="btn-publish" :disabled="saving">
-          {{ saving ? '发布中...' : '🚀 发布' }}
+          {{ saving ? '发布中...' : '发布' }}
         </button>
       </div>
     </div>
@@ -324,19 +324,16 @@ onMounted(() => {
 }
 
 .btn-save {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: #000000;
 }
 
 .btn-save:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5568d3 0%, #63408a 100%);
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(255, 254, 254, 0.4);
 }
 
 .btn-publish {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  color: white;
+  color: #000000;
 }
 
 .btn-publish:hover:not(:disabled) {

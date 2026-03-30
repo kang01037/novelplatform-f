@@ -1,7 +1,7 @@
 <template>
   <div class="novel-create">
     <div class="page-header">
-      <h1>➕ 创建新小说</h1>
+      <h1>创建新小说</h1>
       <button @click="goBack" class="btn-back">← 返回</button>
     </div>
 
@@ -18,7 +18,6 @@
             </div>
             <div v-else class="cover-placeholder">
               <label for="coverImage" class="upload-label">
-                <span class="upload-icon">📷</span>
                 <span class="upload-text">点击上传封面</span>
                 <span class="upload-hint">支持 JPG、PNG 格式，不超过 5MB</span>
               </label>
@@ -397,7 +396,7 @@ const goBack = () => {
 
 .btn-submit {
   padding: 1rem 3rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff0000 0%, #00ff67 100%);
   color: white;
   border: none;
   border-radius: 8px;

@@ -23,10 +23,9 @@
     </div>
 
     <div v-else-if="chapter" class="reader-content">
-      <div class="chapter-body" :style="{ fontSize: `${fontSize}px` }">
+      <div class="chapter-body" :style="{ fontSize: `${fontSize}px`, backgroundColor: isNightMode ? '#333' : bgColor, color: isNightMode ? '#eee' : '#333' }">
         <h2 class="chapter-title">{{ chapter.chapterTitle }}</h2>
         <div class="chapter-meta">
-          <span class="novel-name">📖 {{ chapter.novelName }}</span>
           <span class="word-count">{{ chapter.wordCount }}字</span>
         </div>
         <div class="content">
@@ -55,7 +54,7 @@
     <!-- 阅读设置 -->
     <div v-if="showSettings" class="settings-overlay" @click.self="showSettings = false">
       <div class="settings-panel">
-        <h4>🎨 阅读设置</h4>
+        <h4>阅读设置</h4>
         <div class="setting-item">
           <label>字体大小</label>
           <div class="font-size-controls">
@@ -73,8 +72,8 @@
           <div class="bg-color-options">
             <div
                 class="bg-color"
-                :style="{ backgroundColor: '#fff', border: bgColor === '#fff' ? '3px solid #667eea' : '1px solid #ddd' }"
-                @click="bgColor = '#fff'"
+                :style="{ backgroundColor: '#ffffff', border: bgColor === '#ffffff' ? '3px solid #667eea' : '1px solid #ddd' }"
+                @click="bgColor = '#ffffff'"
                 title="白色"
             ></div>
             <div
@@ -119,7 +118,7 @@ const error = ref('')
 const showSettings = ref(false)
 const fontSize = ref(16)
 const isNightMode = ref(false)
-const bgColor = ref('#fff')
+const bgColor = ref('#ffffff')
 
 const getChapterDetail = async () => {
   try {
@@ -265,9 +264,14 @@ onMounted(() => {
 
 <style scoped>
 .chapter-read-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
   background-color: #f8f9fa;
   color: #333;
   transition: all 0.3s;
@@ -282,7 +286,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0.8rem 2rem;
   border-bottom: 1px solid #e0e0e0;
   background-color: white;
   position: sticky;
@@ -308,24 +312,37 @@ onMounted(() => {
 
 .btn {
   padding: 0.6rem 1.2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
+  background: #ffffff;
+  color: #333333;
+  border: 2px solid #ffffff;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .btn:hover:not(:disabled) {
+  background: #f5f5f5;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
 }
 
 .btn:disabled {
-  background: #ccc;
+  background: #cccccc;
+  border-color: #cccccc;
   cursor: not-allowed;
   transform: none;
+}
+
+.chapter-read-container.night-mode .btn {
+  background: #444444;
+  color: #ffffff;
+  border-color: #444444;
+}
+
+.chapter-read-container.night-mode .btn:hover:not(:disabled) {
+  background: #555555;
 }
 
 .loading-container,
@@ -336,7 +353,7 @@ onMounted(() => {
   justify-content: center;
   padding: 5rem 2rem;
   text-align: center;
-  flex: 1;
+  min-height: calc(100vh - 60px);
 }
 
 .loading-spinner {
@@ -368,9 +385,9 @@ onMounted(() => {
 
 .btn-retry {
   padding: 0.8rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
+  background: #ffffff;
+  color: #333333;
+  border: 2px solid #ffffff;
   border-radius: 6px;
   font-size: 1rem;
   cursor: pointer;
@@ -379,45 +396,38 @@ onMounted(() => {
 
 .btn-retry:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
 }
 
 .reader-content {
-  flex: 1;
-  padding: 3rem 2rem;
-  max-width: 900px;
-  margin: 0 auto;
-  line-height: 2;
-  transition: all 0.3s;
+  padding: 0;
   width: 100%;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
 }
 
 .chapter-body {
-  background: white;
-  padding: 3rem;
-  border-radius: 12px;
+  padding: 2rem 8%;
+  border-radius: 0;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 2rem;
   transition: all 0.3s;
+  flex: 1;
 }
 
 .chapter-body .content {
   text-indent: 2em;
   white-space: pre-wrap;
   line-height: 2.2;
-  font-size: inherit; /* 继承父元素的字体大小 */
-  color: inherit; /* 继承父元素的颜色 */
-}
-
-.chapter-read-container.night-mode .chapter-body {
-  background: #333;
+  font-size: inherit;
+  color: inherit;
 }
 
 .chapter-title {
   text-align: center;
   margin: 0 0 2rem 0;
   font-size: 1.8rem;
-  color: #333;
   font-weight: bold;
 }
 
@@ -455,8 +465,9 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  max-width: 900px;
-  margin: 0 auto;
+  padding: 0 8% 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .btn-nav {
@@ -587,12 +598,8 @@ onMounted(() => {
     padding: 0.8rem 1rem;
   }
 
-  .reader-content {
-    padding: 1.5rem 1rem;
-  }
-
   .chapter-body {
-    padding: 1.5rem;
+    padding: 1.5rem 4%;
   }
 
   .chapter-title {
@@ -601,6 +608,7 @@ onMounted(() => {
 
   .chapter-nav {
     flex-direction: column;
+    padding: 0 4% 2rem;
   }
 
   .btn-nav {

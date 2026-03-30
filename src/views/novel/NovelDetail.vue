@@ -24,48 +24,44 @@
         <div class="novel-info">
           <h2>{{ novel.novelName }}</h2>
           <div class="novel-meta">
-            <span>👤 作者：{{ novel.authorId }}</span>
-            <span>📚 分类：{{ novel.categoryId }}</span>
+            <span>作者：{{ novel.authorId }}</span>
+            <span>分类：{{ novel.categoryId }}</span>
           </div>
           <div class="novel-stats">
             <div class="stat-item">
-              <span class="stat-icon">🔥</span>
               <span class="stat-label">点击</span>
               <span class="stat-value">{{ formatNumber(novel.clickCount) }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-icon">⭐</span>
               <span class="stat-label">收藏</span>
               <span class="stat-value">{{ formatNumber(novel.collectCount) }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-icon">👍</span>
               <span class="stat-label">推荐</span>
               <span class="stat-value">{{ formatNumber(novel.recommendCount) }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-icon">📊</span>
               <span class="stat-label">评分</span>
               <span class="stat-value">{{ novel.score ? novel.score.toFixed(1) : '--' }}</span>
               <span class="stat-count">({{ novel.scoreCount || 0 }}人)</span>
             </div>
           </div>
           <div class="novel-actions">
-            <button class="btn btn-primary" @click="addToBookshelf">📚 收藏</button>
-            <button class="btn btn-success" @click="router.push(`/chapter/list/${novel.novelId}`)">📖 开始阅读</button>
-            <button class="btn btn-warning" @click="showScoreModal = true">⭐ 评分</button>
+            <button class="btn btn-primary" @click="addToBookshelf">收藏</button>
+            <button class="btn btn-success" @click="router.push(`/chapter/list/${novel.novelId}`)">开始阅读</button>
+            <button class="btn btn-warning" @click="showScoreModal = true">评分</button>
           </div>
         </div>
       </div>
 
       <div class="novel-content">
-        <h3>📖 小说简介</h3>
+        <h3>小说简介</h3>
         <p class="content-text">{{ novel.content }}</p>
       </div>
 
       <div class="novel-chapters">
         <div class="section-header">
-          <h3>📑 最新章节</h3>
+          <h3>最新章节</h3>
           <span class="update-time" v-if="lastChapter">
             更新时间：{{ formatDate(lastChapter.updateTime || lastChapter.createTime) }}
           </span>
@@ -80,9 +76,60 @@
         <button class="btn btn-block" @click="router.push(`/chapter/list/${novel.novelId}`)">查看全部章节</button>
       </div>
 
+      <!-- 评论区 -->
       <div class="novel-comments">
-        <h3>💬 评论</h3>
-        <router-link :to="`/comment/list/${novel.novelId}`" class="btn btn-block">查看全部评论</router-link>
+        <div class="comments-header">
+          <h3>💬 评论</h3>
+          <span class="comment-count">共 {{ comments.length }} 条评论</span>
+        </div>
+
+        <!-- 发表评论 -->
+        <div class="comment-form">
+          <h4>发表评论</h4>
+          <textarea
+              v-model="newComment.content"
+              placeholder="请输入评论内容..."
+              rows="3"
+              :disabled="submitting"
+          ></textarea>
+          <button class="btn btn-primary" @click="submitComment" :disabled="submitting || !newComment.content.trim()">
+            {{ submitting ? '提交中...' : '发表评论' }}
+          </button>
+        </div>
+
+        <!-- 评论列表 -->
+        <div v-if="commentsLoading" class="comments-loading">
+          <div class="loading-spinner small"></div>
+          <p>加载中...</p>
+        </div>
+        <div v-else-if="comments.length === 0" class="empty-comments">
+          <p>暂无评论，快来发表第一条评论吧！</p>
+        </div>
+        <div v-else class="comments-list">
+          <div v-for="comment in comments.slice(0, 5)" :key="comment.commentId" class="comment-item">
+            <div class="comment-header">
+              <div class="user-info">
+                <div class="user-avatar">
+                  <img v-if="comment.userAvatar" :src="comment.userAvatar" :alt="comment.username">
+                  <div v-else class="avatar-placeholder">{{ comment.username?.charAt(0).toUpperCase() }}</div>
+                </div>
+                <span class="comment-user">{{ comment.username || '用户' }}</span>
+              </div>
+              <span class="comment-time">{{ formatDate(comment.createdTime) }}</span>
+            </div>
+            <div class="comment-content">{{ comment.content }}</div>
+            <div class="comment-footer">
+              <button class="btn-action" @click="likeComment(comment.commentId)" :disabled="liking">
+                👍 {{ comment.likeCount || 0 }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 查看更多评论 -->
+          <div v-if="comments.length > 5" class="view-more">
+            <router-link :to="`/comment/list/${novel.novelId}`" class="btn btn-block">查看全部评论</router-link>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -114,7 +161,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { novelApi, chapterApi, bookshelfApi } from '../../api'
+import { novelApi, chapterApi, bookshelfApi, commentApi, userApi } from '../../api'
 
 const route = useRoute()
 const router = useRouter()
@@ -125,6 +172,141 @@ const loading = ref(false)
 const error = ref('')
 const showScoreModal = ref(false)
 const score = ref(5)
+
+// 评论相关
+const comments = ref([])
+const commentsLoading = ref(false)
+const submitting = ref(false)
+const liking = ref(false)
+const newComment = ref({ content: '' })
+const userCache = ref({})
+
+const getUserInfo = async (userId) => {
+  if (userCache.value[userId]) {
+    return userCache.value[userId]
+  }
+
+  try {
+    const response = await userApi.getUser(userId)
+    if (response.data.code === 200 || response.data.message === 'success') {
+      const userInfo = response.data.data
+      console.log(`用户${userId}信息:`, userInfo)
+      userCache.value[userId] = {
+        username: userInfo.username || `用户${userId}`,
+        avatar: userInfo.avatar || null
+      }
+      return userCache.value[userId]
+    }
+  } catch (err) {
+    console.error(`获取用户${userId}信息失败:`, err)
+  }
+
+  return {
+    username: `用户${userId}`,
+    avatar: null
+  }
+}
+
+const getComments = async () => {
+  try {
+    commentsLoading.value = true
+
+    const response = await commentApi.getCommentsByNovel(novelId)
+
+    if (response.data.code === 200 || response.data.message === 'success') {
+      const commentList = response.data.data || []
+      console.log('评论列表:', commentList)
+
+      // 获取每个评论的用户名和头像
+      for (const comment of commentList) {
+        console.log('处理评论:', comment)
+        const userInfo = await getUserInfo(comment.userId)
+        comment.username = userInfo.username
+        comment.userAvatar = userInfo.avatar
+        console.log(`评论用户信息:`, {
+          userId: comment.userId,
+          username: comment.username,
+          avatar: comment.userAvatar
+        })
+      }
+
+      comments.value = commentList
+    }
+  } catch (err) {
+    console.error('获取评论失败:', err)
+  } finally {
+    commentsLoading.value = false
+  }
+}
+
+const submitComment = async () => {
+  if (!newComment.value.content.trim()) {
+    alert('请输入评论内容')
+    return
+  }
+
+  submitting.value = true
+
+  try {
+    const userId = localStorage.getItem('userId') || '1'
+    const response = await commentApi.createComment({
+      userId: parseInt(userId),
+      novelId: parseInt(novelId),
+      chapterId: null,
+      parentId: null,
+      content: newComment.value.content.trim()
+    })
+
+    if (response.data.code === 200 || response.data.message === 'success') {
+      alert('✅ 评论成功')
+      newComment.value.content = ''
+      await getComments()
+    } else {
+      alert(response.data.message || '评论失败')
+    }
+  } catch (err) {
+    console.error('发表评论失败:', err)
+    if (err.response) {
+      const { code, message } = err.response.data
+      if (code === 200 && message === 'success') {
+        alert('✅ 评论成功')
+        newComment.value.content = ''
+        await getComments()
+        return
+      }
+      alert(`评论失败：${message}`)
+    } else {
+      alert('发表评论失败，请稍后重试')
+    }
+  } finally {
+    submitting.value = false
+  }
+}
+
+const likeComment = async (commentId) => {
+  if (liking.value) return
+
+  liking.value = true
+
+  try {
+    const response = await commentApi.likeComment(commentId)
+
+    if (response.data.code === 200 ||
+        response.data.message === 'success' ||
+        response.data.message === '点赞成功') {
+      const comment = comments.value.find(c => c.commentId === commentId)
+      if (comment) {
+        comment.likeCount = (comment.likeCount || 0) + 1
+      }
+    } else {
+      alert(response.data.message || '点赞失败')
+    }
+  } catch (err) {
+    console.error('点赞失败:', err)
+  } finally {
+    liking.value = false
+  }
+}
 
 const getNovelStatusText = (status) => {
   const statusMap = {
@@ -181,10 +363,13 @@ const loadData = async () => {
       lastChapter.value = chapterResponse.data.data
       console.log('最新章节:', lastChapter.value)
     }
+
+    // 加载评论
+    await getComments()
   } catch (err) {
     console.error('加载数据失败:', err)
     if (err.response) {
-      const { code, message } = err.response.data
+      const {code, message} = err.response.data
       if (code === 200 && message === 'success') {
         return
       }
@@ -202,7 +387,7 @@ const loadData = async () => {
 const addToBookshelf = async () => {
   try {
     const userId = localStorage.getItem('userId') || '1'
-    console.log('加入书架请求:', { userId: parseInt(userId), novelId: parseInt(novelId) })
+    console.log('加入书架请求:', {userId: parseInt(userId), novelId: parseInt(novelId)})
 
     const response = await bookshelfApi.addToBookshelf({
       userId: parseInt(userId),
@@ -229,7 +414,7 @@ const addToBookshelf = async () => {
     console.error('错误响应:', err.response)
 
     if (err.response) {
-      const { code, message } = err.response.data
+      const {code, message} = err.response.data
       console.log('错误码:', code, '错误消息:', message)
 
       // 即使 HTTP 状态码错误，也检查业务逻辑是否成功
@@ -332,9 +517,18 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
+.loading-spinner.small {
+  width: 30px;
+  height: 30px;
+}
+
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-container p {
@@ -622,16 +816,194 @@ onMounted(() => {
 }
 
 .novel-comments {
+  margin-bottom: 2rem;
   padding: 2rem;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
-.novel-comments h3 {
-  margin-top: 0;
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.comments-header h3 {
+  margin: 0;
   color: #333;
   font-size: 1.5rem;
+}
+
+.comment-count {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.comment-form {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.comment-form h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.comment-form textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  margin-bottom: 1rem;
+  transition: border-color 0.3s;
+  font-family: inherit;
+}
+
+.comment-form textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.comment-form textarea:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.comments-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem;
+  color: #999;
+}
+
+.empty-comments {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.comment-item {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.comment-item:hover {
+  background-color: #f0f0f0;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid #fff;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.comment-user {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.comment-time {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.comment-content {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: #333;
+  font-size: 1rem;
+  white-space: pre-wrap;
+}
+
+.comment-footer {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-action {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  background-color: #f0f0f0;
+  color: #666;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-action:hover:not(:disabled) {
+  background-color: #e0e0e0;
+  transform: translateY(-1px);
+}
+
+.btn-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.view-more {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e0e0e0;
 }
 
 .modal {
@@ -721,6 +1093,10 @@ onMounted(() => {
 
   .btn {
     width: 100%;
+  }
+
+  .comment-form textarea {
+    rows: 2;
   }
 }
 </style>
