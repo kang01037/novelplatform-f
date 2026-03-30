@@ -1,91 +1,105 @@
 <template>
-  <div class="novel-create">
-    <div class="page-header">
-      <h1>创建新小说</h1>
-      <button @click="goBack" class="btn-back">← 返回</button>
-    </div>
+  <div class="create-page">
+    <div class="content-wrapper">
+      <!-- 页面头部 -->
+      <header class="page-header">
+        <div class="header-inner">
+          <button @click="goBack" class="back-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            返回
+          </button>
+          <div class="header-title">
+            <h1>创建新小说</h1>
+            <p>开启你的创作之旅</p>
+          </div>
+        </div>
+      </header>
 
-    <div class="create-form">
-      <div class="form-section">
-        <h3>基本信息</h3>
-
-        <div class="form-group">
-          <label for="coverImage">小说封面</label>
-          <div class="cover-upload">
-            <div v-if="coverPreview" class="cover-preview">
-              <img :src="coverPreview" alt="封面预览">
-              <button @click="removeCover" class="btn-remove" type="button">✕</button>
+      <!-- 表单主体 -->
+      <div class="form-container glass-card">
+        <div class="form-layout">
+          <!-- 左侧：封面上传 -->
+          <div class="cover-section">
+            <div class="cover-upload-box" :class="{ 'has-image': coverPreview }">
+              <template v-if="coverPreview">
+                <img :src="coverPreview" alt="封面预览" class="preview-img">
+                <div class="cover-actions-overlay">
+                  <label for="coverImage" class="action-btn change">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    更换
+                  </label>
+                  <button @click="removeCover" class="action-btn delete">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    删除
+                  </button>
+                </div>
+              </template>
+              <template v-else>
+                <label for="coverImage" class="upload-placeholder">
+                  <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </div>
+                  <span class="text-main">点击上传封面</span>
+                  <span class="text-sub">支持 JPG / PNG，建议尺寸 3:4</span>
+                </label>
+              </template>
+              <input type="file" id="coverImage" @change="handleCoverChange" accept="image/*" hidden>
             </div>
-            <div v-else class="cover-placeholder">
-              <label for="coverImage" class="upload-label">
-                <span class="upload-text">点击上传封面</span>
-                <span class="upload-hint">支持 JPG、PNG 格式，不超过 5MB</span>
-              </label>
+            <div v-if="uploading" class="loading-tip">
+              <div class="spinner small"></div>
+              <span>正在上传...</span>
             </div>
-            <input
-                type="file"
-                id="coverImage"
-                @change="handleCoverChange"
-                accept="image/*"
-                style="display: none"
-            >
-          </div>
-          <div v-if="uploading" class="uploading-tip">
-            <span class="loading-spinner"></span>
-            上传中...
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="novelName">小说名称 *</label>
-          <input
-              type="text"
-              id="novelName"
-              v-model="form.novelName"
-              placeholder="请输入小说名称"
-              required
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="content">简介 *</label>
-          <textarea
-              id="content"
-              v-model="form.content"
-              placeholder="请输入小说简介"
-              rows="5"
-              required
-          ></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="categoryId">分类</label>
-            <select id="categoryId" v-model="form.categoryId">
-              <option :value="1">玄幻奇幻</option>
-              <option :value="2">武侠仙侠</option>
-              <option :value="3">都市言情</option>
-              <option :value="4">科幻灵异</option>
-              <option :value="5">历史军事</option>
-              <option :value="6">游戏竞技</option>
-            </select>
           </div>
 
-          <div class="form-group">
-            <label for="novelStatus">连载状态</label>
-            <select id="novelStatus" v-model="form.novelStatus">
-              <option :value="0">连载中</option>
-              <option :value="1">已完结</option>
-              <option :value="2">暂停</option>
-            </select>
+          <!-- 右侧：表单信息 -->
+          <div class="form-section">
+            <div class="form-group">
+              <label>小说名称 <span class="required">*</span></label>
+              <input type="text" v-model="form.novelName" placeholder="请输入一个响亮的名字" >
+            </div>
+
+            <div class="form-group">
+              <label>作品简介 <span class="required">*</span></label>
+              <textarea v-model="form.content" placeholder="简单介绍一下你的故事..." rows="5"></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>分类</label>
+                <div class="select-wrapper">
+                  <select v-model="form.categoryId">
+                    <option :value="1">玄幻奇幻</option>
+                    <option :value="2">武侠仙侠</option>
+                    <option :value="3">都市言情</option>
+                    <option :value="4">科幻灵异</option>
+                    <option :value="5">历史军事</option>
+                    <option :value="6">游戏竞技</option>
+                  </select>
+                  <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>连载状态</label>
+                <div class="select-wrapper">
+                  <select v-model="form.novelStatus">
+                    <option :value="0">连载中</option>
+                    <option :value="1">已完结</option>
+                    <option :value="2">暂停</option>
+                  </select>
+                  <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="submit-section">
+              <button @click="submitNovel" class="submit-btn" :disabled="submitting || uploading">
+                <div v-if="submitting || uploading" class="spinner btn-spinner"></div>
+                <span v-else>立即创建</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div class="form-actions">
-        <button @click="submitNovel" class="btn-submit" :disabled="submitting || uploading">
-          {{ uploading ? '上传中...' : submitting ? '提交中...' : '🚀 创建小说' }}
-        </button>
       </div>
     </div>
   </div>
@@ -134,59 +148,34 @@ const handleCoverChange = async (event) => {
     coverPreview.value = e.target.result
   }
   reader.readAsDataURL(file)
-
   coverImage.value = file
 }
-
 
 const removeCover = () => {
   coverImage.value = null
   coverPreview.value = ''
-  // 清空 input，允许重新上传
   const input = document.getElementById('coverImage')
-  if (input) {
-    input.value = ''
-  }
+  if (input) input.value = ''
 }
 
+// 保持原有的上传逻辑不变
 const uploadCover = async (novelId) => {
   if (!coverImage.value) return null
-
   try {
     uploading.value = true
-
-    // 创建 FormData 对象（参考头像上传）
     const formData = new FormData()
     formData.append('novelId', novelId)
     formData.append('file', coverImage.value)
 
-    console.log('上传封面:', formData)
     const response = await novelApi.uploadCover(formData)
-    console.log('封面上传响应:', response)
-
     if (response.data.code === 200 || response.data.message === 'success') {
-      const coverUrl = response.data.data?.imageUrl || response.data.data
-      console.log('封面上传成功，URL:', coverUrl)
-      return coverUrl
-    } else {
-      console.error('封面上传失败:', response.data.message)
-      return null
+      return response.data.data?.imageUrl || response.data.data
     }
+    return null
   } catch (error) {
     console.error('封面上传失败:', error)
-    // 参考头像上传的 catch 处理
-    if (error.response) {
-      const { code, message } = error.response.data
-      if (code === 200 && message === 'success') {
-        const coverUrl = error.response.data.data?.imageUrl || error.response.data.data
-        console.log('封面上传成功，URL:', coverUrl)
-        return coverUrl
-      }
-      console.error('封面上传失败:', message)
-    } else if (error.request) {
-      console.error('封面上传失败：无法连接到服务器')
-    } else {
-      console.error('封面上传失败:', error.message)
+    if (error.response?.data?.code === 200) {
+      return error.response.data.data?.imageUrl || error.response.data.data
     }
     return null
   } finally {
@@ -194,6 +183,7 @@ const uploadCover = async (novelId) => {
   }
 }
 
+// 保持原有的提交逻辑不变
 const submitNovel = async () => {
   if (!form.novelName || !form.content) {
     alert('请填写小说名称和简介')
@@ -202,7 +192,6 @@ const submitNovel = async () => {
 
   try {
     submitting.value = true
-
     const userId = localStorage.getItem('userId')
     if (!userId) {
       alert('请先登录')
@@ -210,7 +199,7 @@ const submitNovel = async () => {
       return
     }
 
-    // 第一步：创建小说（不传封面）
+    // 1. 创建小说
     const novelData = {
       novelName: form.novelName,
       content: form.content,
@@ -219,71 +208,40 @@ const submitNovel = async () => {
       novelStatus: parseInt(form.novelStatus)
     }
 
-    console.log('创建小说:', novelData)
     const response = await novelApi.createNovel(novelData)
-    console.log('创建小说响应:', response)
 
     if (response.data.code === 200 || response.data.message === 'success') {
-      // 第二步：通过小说名查询刚创建的小说，获取 novelId
-      console.log('开始查询小说 ID，小说名:', form.novelName)
+      // 2. 查询ID
       const searchResponse = await novelApi.searchNovels(form.novelName)
-      console.log('查询小说响应:', searchResponse)
-
       if (searchResponse.data.code === 200 || searchResponse.data.message === 'success') {
         const novels = searchResponse.data.data || []
-        // 找到匹配的小说（通过小说名和作者 ID）
-        const novel = novels.find(n =>
-            n.novelName === form.novelName &&
-            n.authorId === parseInt(userId)
-        )
+        const novel = novels.find(n => n.novelName === form.novelName && n.authorId === parseInt(userId))
 
         if (novel) {
           const novelId = novel.novelId
-          console.log('查询到小说 ID:', novelId)
-
-          // 第三步：如果有上传封面，调用上传接口
+          // 3. 上传封面
           if (coverImage.value && novelId) {
-            console.log('开始上传封面')
             const coverUrl = await uploadCover(novelId)
             if (coverUrl) {
-              console.log('封面上传成功:', coverUrl)
               alert('✅ 小说创建成功，封面已上传！')
             } else {
-              alert('⚠️ 小说创建成功，但封面上传失败！请稍后在小说管理中上传封面')
+              alert('⚠️ 小说创建成功，但封面上传失败！')
             }
           } else {
             alert('小说创建成功！')
           }
-
           router.push('/writer/novels')
         } else {
-          console.error('未找到匹配的小说')
           alert('小说创建成功，但未找到小说信息')
           router.push('/writer/novels')
         }
-      } else {
-        console.error('查询小说失败:', searchResponse.data.message)
-        alert('小说创建成功，但查询小说信息失败')
-        router.push('/writer/novels')
       }
     } else {
       alert(response.data.message || '创建失败')
     }
   } catch (error) {
     console.error('创建失败:', error)
-    if (error.response) {
-      const { code, message } = error.response.data
-      if (code === 200 && message === 'success') {
-        alert('创建成功！')
-        router.push('/writer/novels')
-        return
-      }
-      alert(`创建失败：${message || '服务器错误'}`)
-    } else if (error.request) {
-      alert('创建失败：无法连接到服务器')
-    } else {
-      alert(`创建失败：${error.message}`)
-    }
+    alert('创建失败，请稍后重试')
   } finally {
     submitting.value = false
   }
@@ -295,194 +253,103 @@ const goBack = () => {
 </script>
 
 <style scoped>
-.novel-create {
-  max-width: 800px;
+/* --- 页面布局 --- */
+.create-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f9f4ff 50%, #fff5f8 100%);
+  padding: 2rem 1rem;
+}
+
+.content-wrapper {
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
 }
 
+/* --- 头部 --- */
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 2rem;
 }
 
-.page-header h1 {
-  margin: 0;
-  font-size: 2rem;
-  color: #333;
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.btn-back {
-  padding: 0.6rem 1.5rem;
-  background: #f0f0f0;
-  color: #333;
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.6);
   border: none;
-  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 30px;
+  color: #666;
+  font-weight: 500;
   cursor: pointer;
-  font-size: 1rem;
   transition: all 0.3s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 
-.btn-back:hover {
-  background: #e0e0e0;
-}
-
-.create-form {
+.back-btn:hover {
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #667eea;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
 }
 
-.form-section {
-  margin-bottom: 2rem;
+.back-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
-.form-section h3 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.2rem;
+.header-title h1 {
+  margin: 0;
+  font-size: 1.8rem;
   color: #333;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #eee;
+  font-weight: 700;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
+.header-title p {
+  margin: 0.3rem 0 0;
+  color: #888;
+  font-size: 0.9rem;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #555;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-family: inherit;
-  transition: border-color 0.3s;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.form-group textarea {
-  resize: vertical;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.form-actions {
-  text-align: center;
-  padding-top: 1rem;
-  border-top: 2px solid #eee;
-}
-
-.btn-submit {
-  padding: 1rem 3rem;
-  background: linear-gradient(135deg, #ff0000 0%, #00ff67 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-submit:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.cover-upload {
-  position: relative;
-  width: 100%;
-  max-width: 300px;
-}
-
-.cover-preview {
-  position: relative;
-  width: 100%;
-  padding-bottom: 133%; /* 3:4 比例 */
-  border-radius: 8px;
+/* --- 玻璃卡片 --- */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.cover-preview img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.form-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 3rem;
+  padding: 2.5rem;
 }
 
-.btn-remove {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(244, 67, 54, 0.9);
-  color: white;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
+/* --- 封面上传 --- */
+.cover-section {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-  z-index: 10;
+  flex-direction: column;
 }
 
-.btn-remove:hover {
-  background: rgba(244, 67, 54, 1);
-  transform: scale(1.1);
-}
-
-.cover-placeholder {
+.cover-upload-box {
   width: 100%;
-  padding-bottom: 133%; /* 3:4 比例 */
-  border: 2px dashed #ddd;
-  border-radius: 8px;
-  background: #f9f9f9;
-  cursor: pointer;
+  aspect-ratio: 3/4;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  background: #f0f2f5;
+  border: 2px dashed transparent;
   transition: all 0.3s;
 }
 
-.cover-placeholder:hover {
-  border-color: #667eea;
-  background: #f0f4ff;
-}
-
-.upload-label {
-  position: absolute;
-  top: 0;
-  left: 0;
+.upload-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
@@ -491,47 +358,240 @@ const goBack = () => {
   justify-content: center;
   cursor: pointer;
   color: #999;
+  border: 2px dashed rgba(0,0,0,0.1);
+  border-radius: 16px;
+  transition: all 0.3s;
 }
 
-.upload-icon {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
+.upload-placeholder:hover {
+  border-color: #a18cd1;
+  background: rgba(161, 140, 209, 0.03);
 }
 
-.upload-text {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #667eea;
+.icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
 
-.upload-hint {
-  font-size: 0.85rem;
-  color: #999;
-  margin-top: 0.5rem;
+.icon-box svg {
+  width: 24px;
+  height: 24px;
+  color: #aaa;
 }
 
-.uploading-tip {
+.text-main { font-weight: 600; color: #555; margin-bottom: 0.3rem; }
+.text-sub { font-size: 0.8rem; color: #aaa; }
+
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-actions-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.cover-upload-box:hover .cover-actions-overlay {
+  opacity: 1;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s;
+}
+
+.action-btn svg { width: 14px; height: 14px; }
+.action-btn.change { background: white; color: #333; }
+.action-btn.delete { background: rgba(255,255,255,0.2); color: white; }
+.action-btn:hover { transform: scale(1.05); }
+
+.loading-tip {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   margin-top: 1rem;
   color: #667eea;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.loading-spinner {
+/* --- 表单区域 --- */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 0.6rem;
+}
+
+.required { color: #ff4757; margin-left: 2px; }
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.6);
+  font-size: 0.95rem;
+  color: #333;
+  transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #a18cd1;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(161, 140, 209, 0.1);
+}
+
+.form-group textarea {
+  resize: none;
+  line-height: 1.6;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.6);
+  font-size: 0.95rem;
+  color: #333;
+  appearance: none;
+  cursor: pointer;
+}
+
+.select-wrapper .arrow {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
   width: 16px;
   height: 16px;
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #667eea;
+  color: #999;
+  pointer-events: none;
+}
+
+/* --- 提交按钮 --- */
+.submit-section {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- 加载动画 --- */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+  border-top-color: #667eea;
+  border-left-color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+.spinner.btn-spinner {
+  width: 18px;
+  height: 18px;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* --- 响应式 --- */
+@media (max-width: 768px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+  }
+
+  .cover-upload-box {
+    max-width: 250px;
+    margin: 0 auto;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -1,101 +1,152 @@
 <template>
-  <div class="novel-list-container">
-    <div class="page-header">
-      <h2>小说列表</h2>
-      <div class="header-actions">
-        <div class="filter-group">
-          <select v-model="statusFilter" @change="handleFilter">
-            <option value="">全部状态</option>
-            <option value="0">连载中</option>
-            <option value="1">已完结</option>
-            <option value="2">暂停更新</option>
-          </select>
+  <div class="novel-list-page">
+    <!-- 顶部区域 -->
+    <header class="page-header">
+      <div class="header-content">
+        <h2 class="title">
+          <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          书库探索
+        </h2>
+        <p class="subtitle">发现精彩故事，开启阅读之旅</p>
+      </div>
 
-          <select v-model="sortBy" @change="handleSort">
-            <option value="default">默认排序</option>
-            <option value="click">点击量</option>
-            <option value="collect">收藏数</option>
-            <option value="score">评分</option>
-            <option value="update">更新时间</option>
-          </select>
+      <!-- 工具栏 -->
+      <div class="toolbar glass-card">
+        <div class="filter-group">
+          <div class="select-wrapper">
+            <select v-model="statusFilter" @change="handleFilter">
+              <option value="">全部状态</option>
+              <option value="0">连载中</option>
+              <option value="1">已完结</option>
+              <option value="2">暂停更新</option>
+            </select>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+
+          <div class="select-wrapper">
+            <select v-model="sortBy" @change="handleSort">
+              <option value="default">默认排序</option>
+              <option value="click">点击量</option>
+              <option value="collect">收藏数</option>
+              <option value="score">评分</option>
+              <option value="update">更新时间</option>
+            </select>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
         </div>
 
         <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
           <input
               type="text"
               v-model="searchKeyword"
-              placeholder="搜索小说名..."
+              placeholder="搜索小说名、作者..."
               @keyup.enter="handleSearch"
           >
-          <button @click="handleSearch" :disabled="!searchKeyword.trim()">
-            🔍 搜索
+          <button @click="handleSearch" :disabled="!searchKeyword.trim()" class="search-btn">
+            搜索
           </button>
         </div>
       </div>
-    </div>
+    </header>
 
-    <div v-if="loading" class="loading-container">
-      <div class="loading-spinner"></div>
-      <p>加载中...</p>
-    </div>
-
-    <div v-else-if="loadError" class="error-container">
-      <p class="error-message">❌ {{ loadError }}</p>
-      <button @click="getNovels" class="btn-retry">重试</button>
-    </div>
-
-    <div v-else-if="novels.length === 0" class="empty-container">
-      <p class="empty-message">暂无小说数据</p>
-    </div>
-
-    <div v-else class="novel-grid">
-      <div v-for="novel in novels" :key="novel.novelId" class="novel-card">
-        <router-link :to="`/novel/detail/${novel.novelId}`" class="novel-link">
-          <div class="novel-cover">
-            <img :src="novel.coverImage" :alt="novel.novelName" v-if="novel.coverImage">
-            <div class="cover-placeholder" v-else>
-              {{ novel.novelName.charAt(0) }}
-            </div>
-            <div class="cover-overlay">
-              <span class="status-tag" :class="'status-' + novel.novelStatus">
-                {{ getNovelStatusText(novel.novelStatus) }}
-              </span>
-            </div>
-          </div>
-          <div class="novel-info">
-            <h3 class="novel-title">{{ novel.novelName }}</h3>
-            <p class="novel-desc">{{ novel.content }}</p>
-            <div class="novel-meta">
-              <span class="last-chapter">
-                 {{ novel.lastChapterName || '暂无章节' }}
-              </span>
-            </div>
-            <div class="novel-stats">
-              <div class="stat-item" title="点击量">
-                <span class="stat-icon">点击</span>
-                <span class="stat-value">{{ formatNumber(novel.clickCount) }}</span>
-              </div>
-              <div class="stat-item" title="收藏数">
-                <span class="stat-icon">收藏</span>
-                <span class="stat-value">{{ formatNumber(novel.collectCount) }}</span>
-              </div>
-              <div class="stat-item" title="推荐数">
-                <span class="stat-icon">推荐</span>
-                <span class="stat-value">{{ formatNumber(novel.recommendCount) }}</span>
-              </div>
-              <div class="stat-item" title="评分">
-                <span class="stat-icon">评分</span>
-                <span class="stat-value">{{ novel.score ? novel.score.toFixed(1) : '--' }}</span>
-              </div>
-            </div>
-          </div>
-        </router-link>
+    <!-- 内容区域 -->
+    <main class="content-area">
+      <!-- 加载状态 -->
+      <div v-if="loading" class="state-container loading-state">
+        <div class="spinner"></div>
+        <p>正在加载书库...</p>
       </div>
-    </div>
 
-    <div v-if="novels.length > 0" class="page-footer">
-      <p>共 {{ novels.length }} 部小说</p>
-    </div>
+      <!-- 错误状态 -->
+      <div v-else-if="loadError" class="state-container error-state">
+        <div class="error-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <p class="error-text">{{ loadError }}</p>
+        <button @click="getNovels" class="retry-btn">重新加载</button>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-else-if="novels.length === 0" class="state-container empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>
+        <p>暂无相关小说</p>
+      </div>
+
+      <!-- 小说网格 -->
+      <div v-else class="novel-grid">
+        <div v-for="novel in novels" :key="novel.novelId" class="novel-card">
+          <router-link :to="`/novel/detail/${novel.novelId}`" class="card-link">
+            <!-- 封面区域 -->
+            <div class="card-cover">
+              <img v-if="novel.coverImage" :src="novel.coverImage" :alt="novel.novelName">
+              <div v-else class="cover-placeholder">
+                <span>{{ novel.novelName.charAt(0) }}</span>
+              </div>
+
+              <!-- 状态标签 -->
+              <div class="status-badge" :class="'status-' + novel.novelStatus">
+                {{ getNovelStatusText(novel.novelStatus) }}
+              </div>
+
+              <!-- 悬浮遮罩 -->
+              <div class="cover-mask">
+                <span class="view-detail">查看详情</span>
+              </div>
+            </div>
+
+            <!-- 信息区域 -->
+            <div class="card-body">
+              <h3 class="book-title">{{ novel.novelName }}</h3>
+              <p class="book-desc">{{ novel.content }}</p>
+
+              <div class="book-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                <span>{{ novel.lastChapterName || '暂无章节' }}</span>
+              </div>
+
+              <div class="book-stats">
+                <div class="stat-item" title="点击">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>{{ formatNumber(novel.clickCount) }}</span>
+                </div>
+                <div class="stat-item" title="收藏">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                  <span>{{ formatNumber(novel.collectCount) }}</span>
+                </div>
+                <div class="stat-item" title="推荐">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                  <span>{{ formatNumber(novel.recommendCount) }}</span>
+                </div>
+                <div class="stat-item highlight" title="评分">
+                  <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  <span>{{ novel.score ? novel.score.toFixed(1) : '--' }}</span>
+                </div>
+              </div>
+            </div>
+          </router-link>
+        </div>
+      </div>
+    </main>
+
+    <!-- 底部 -->
+    <footer v-if="novels.length > 0" class="page-footer">
+      <p>已为您展示 {{ novels.length }} 部作品</p>
+    </footer>
   </div>
 </template>
 
@@ -113,22 +164,14 @@ const statusFilter = ref('')
 const sortBy = ref('default')
 
 const getNovelStatusText = (status) => {
-  const statusMap = {
-    0: '连载中',
-    1: '已完结',
-    2: '暂停更新'
-  }
-  return statusMap[status] || '未知'
+  const map = { 0: '连载中', 1: '已完结', 2: '暂停' }
+  return map[status] || '未知'
 }
 
 const formatNumber = (num) => {
   if (!num && num !== 0) return '0'
-  if (num >= 100000000) {
-    return (num / 100000000).toFixed(1) + '亿'
-  }
-  if (num >= 10000) {
-    return (num / 10000).toFixed(1) + '万'
-  }
+  if (num >= 100000000) return (num / 100000000).toFixed(1) + '亿'
+  if (num >= 10000) return (num / 10000).toFixed(1) + '万'
   return num.toString()
 }
 
@@ -137,140 +180,108 @@ const getNovels = async () => {
     loading.value = true
     loadError.value = ''
 
-    console.log('====== 开始请求小说列表 ======')
-    console.log('请求 URL:', '/api/novel/list')
-    console.log('完整 URL:', 'http://localhost:5173/api/novel/list')
-
-    // 直接使用 axios 请求，绕过 API 封装
+    // 保持原有的请求逻辑不变
     const response = await axios.get('/api/novel/list', {
       baseURL: 'http://localhost:5173',
       timeout: 10000
     })
 
-    console.log('====== 收到响应 ======')
-    console.log('响应数据:', response)
-    console.log('响应状态:', response.status)
-    console.log('响应数据 data:', response.data)
-
     if (response.status === 200) {
       const { code, message, data } = response.data
-
-      console.log('code:', code)
-      console.log('message:', message)
-      console.log('data:', data)
-      console.log('data 是否为数组:', Array.isArray(data))
-
       if (code === 200 || message === 'success') {
         let novelData = data || []
+        if (!Array.isArray(novelData)) novelData = []
 
-        if (!Array.isArray(novelData)) {
-          console.error('data 不是数组:', novelData)
-          novelData = []
-        }
-
-        console.log('处理后的数据:', novelData)
-        console.log('数据长度:', novelData.length)
-
-        // 状态筛选
+        // 筛选逻辑
         if (statusFilter.value !== '') {
           novelData = novelData.filter(novel => novel.novelStatus === parseInt(statusFilter.value))
         }
 
-        // 排序
+        // 排序逻辑
         switch (sortBy.value) {
-          case 'click':
-            novelData.sort((a, b) => (b.clickCount || 0) - (a.clickCount || 0))
-            break
-          case 'collect':
-            novelData.sort((a, b) => (b.collectCount || 0) - (a.collectCount || 0))
-            break
-          case 'score':
-            novelData.sort((a, b) => (b.score || 0) - (a.score || 0))
-            break
-          case 'update':
-            novelData.sort((a, b) => new Date(b.lastUpdateTime || 0) - new Date(a.lastUpdateTime || 0))
-            break
+          case 'click': novelData.sort((a, b) => (b.clickCount || 0) - (a.clickCount || 0)); break
+          case 'collect': novelData.sort((a, b) => (b.collectCount || 0) - (a.collectCount || 0)); break
+          case 'score': novelData.sort((a, b) => (b.score || 0) - (a.score || 0)); break
+          case 'update': novelData.sort((a, b) => new Date(b.lastUpdateTime || 0) - new Date(a.lastUpdateTime || 0)); break
         }
 
         novels.value = novelData
-        console.log('最终 novels:', novels.value)
-        console.log('====== 数据加载完成 ======')
       } else {
-        loadError.value = `API 返回错误：${message || '未知错误'}`
-        console.error('API 错误:', response.data)
+        loadError.value = message || '获取数据失败'
       }
     }
   } catch (err) {
-    console.error('====== 请求失败 ======')
-    console.error('错误类型:', err)
-    console.error('错误消息:', err.message)
-    console.error('错误堆栈:', err.stack)
-
-    if (err.response) {
-      console.error('错误响应状态:', err.response.status)
-      console.error('错误响应数据:', err.response.data)
-      loadError.value = `服务器错误 (${err.response.status}): ${err.response.data?.message || '未知错误'}`
-    } else if (err.request) {
-      console.error('请求未得到响应:', err.request)
-      loadError.value = '无法连接到服务器，请检查：\n1. 前端开发服务器是否运行 (npm run dev)\n2. 后端服务是否启动 (http://localhost:8080)\n3. 查看 Network 标签中的请求详情'
-    } else {
-      loadError.value = `请求错误：${err.message}`
-    }
+    console.error(err)
+    loadError.value = '网络连接异常，请检查后端服务'
   } finally {
     loading.value = false
-    console.log('====== 加载结束，loading = false ======')
   }
 }
 
-const handleFilter = () => {
-  getNovels()
-}
-
-const handleSort = () => {
-  getNovels()
-}
-
+const handleFilter = () => getNovels()
+const handleSort = () => getNovels()
 const handleSearch = () => {
-  const keyword = searchKeyword.value.trim()
-  if (keyword) {
-    router.push(`/novel/search?keyword=${encodeURIComponent(keyword)}`)
+  if (searchKeyword.value.trim()) {
+    router.push(`/novel/search?keyword=${encodeURIComponent(searchKeyword.value.trim())}`)
   }
 }
 
-onMounted(() => {
-  console.log('NovelList 组件已挂载')
-  getNovels()
-})
+onMounted(() => getNovels())
 </script>
 
 <style scoped>
-.novel-list-container {
+/* --- 页面整体布局 --- */
+.novel-list-page {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #f8f9fa;
-  min-height: 100vh;
+  background: transparent;
 }
 
+/* --- 头部设计 --- */
 .page-header {
+  margin-bottom: 2.5rem;
+}
+
+.header-content {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #333;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0 0 0.5rem;
+}
+
+.title-icon {
+  width: 32px;
+  height: 32px;
+  color: #667eea;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* --- 工具栏 (玻璃态) --- */
+.toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.page-header h2 {
-  margin: 0;
-  font-size: 2rem;
-  color: #333;
-}
-
-.header-actions {
-  display: flex;
+  padding: 1.2rem 1.8rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   gap: 1.5rem;
-  align-items: center;
+  flex-wrap: wrap;
 }
 
 .filter-group {
@@ -278,70 +289,104 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.filter-group select {
-  padding: 0.6rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  background-color: white;
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  appearance: none;
+  padding: 0.7rem 2.5rem 0.7rem 1.2rem;
+  border-radius: 30px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
   cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.select-wrapper select:hover {
+  border-color: #a18cd1;
+}
+
+.select-wrapper select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.arrow-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #999;
+  pointer-events: none;
+}
+
+/* --- 搜索框 --- */
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 30px;
+  padding: 0.3rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.08);
   transition: all 0.3s;
 }
 
-.filter-group select:hover {
+.search-box:focus-within {
   border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 }
 
-.filter-group select:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.search-box {
-  display: flex;
-  gap: 0.5rem;
+.search-icon {
+  width: 20px;
+  height: 20px;
+  margin-left: 1rem;
+  color: #999;
 }
 
 .search-box input {
-  padding: 0.6rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 1rem;
   font-size: 0.95rem;
-  width: 250px;
-  transition: all 0.3s;
+  width: 220px;
+  color: #333;
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.search-box button {
-  padding: 0.6rem 1.5rem;
-  background: linear-gradient(135deg, #3bda68 0%, #54ff00 100%);
+.search-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.95rem;
+  border-radius: 25px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: transform 0.2s;
 }
 
-.search-box button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+.search-btn:hover:not(:disabled) {
+  transform: scale(1.05);
 }
 
-.search-box button:disabled {
+.search-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.loading-container,
-.error-container,
-.empty-container {
+/* --- 状态显示 --- */
+.state-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -350,198 +395,192 @@ onMounted(() => {
   text-align: center;
 }
 
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-container p {
-  color: #666;
-  font-size: 1.1rem;
-}
-
-.error-message {
-  color: #f44336;
-  font-size: 1.2rem;
+.error-icon-box svg, .empty-state svg {
+  width: 60px;
+  height: 60px;
+  color: #ddd;
   margin-bottom: 1rem;
-  white-space: pre-line;
 }
 
-.empty-message {
-  color: #999;
-  font-size: 1.2rem;
+.error-text {
+  color: #ff4757;
+  margin-bottom: 1.5rem;
+  max-width: 400px;
 }
 
-.debug-info {
-  margin-top: 1rem;
-  padding: 1.5rem;
-  background-color: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 6px;
-  color: #856404;
-  text-align: left;
-  max-width: 600px;
-}
-
-.debug-info p {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-.btn-retry {
-  padding: 0.8rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.retry-btn {
+  background: #667eea;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
+  padding: 0.6rem 2rem;
+  border-radius: 20px;
   cursor: pointer;
-  transition: all 0.3s;
-  margin-top: 1rem;
+  font-weight: 600;
 }
 
-.btn-retry:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
+/* --- 小说网格 --- */
 .novel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 2rem;
 }
 
 .novel-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .novel-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 30px rgba(102, 126, 234, 0.15);
 }
 
-.novel-link {
+.card-link {
   text-decoration: none;
   color: inherit;
   display: block;
 }
 
-.novel-cover {
+/* --- 封面设计 --- */
+.card-cover {
   position: relative;
-  height: 220px;
+  height: 200px;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f0f2f5;
 }
 
-.novel-cover img {
+.card-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
+  transition: transform 0.5s ease;
 }
 
-.novel-card:hover .novel-cover img {
-  transform: scale(1.1);
+.novel-card:hover .card-cover img {
+  transform: scale(1.08);
 }
 
 .cover-placeholder {
-  height: 100%;
   width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
   color: white;
   font-size: 4rem;
   font-weight: bold;
+  opacity: 0.8;
 }
 
-.cover-overlay {
+.status-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 2;
+}
+
+.status-0 { background: #667eea; }
+.status-1 { background: #00b894; }
+.status-2 { background: #fdcb6e; color: #333; }
+
+.cover-mask {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  padding: 0.8rem;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-.status-tag {
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
+.novel-card:hover .cover-mask {
+  opacity: 1;
+}
+
+.view-detail {
   color: white;
+  border: 1px solid white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  backdrop-filter: blur(5px);
 }
 
-.status-0 {
-  background-color: #2196F3;
+/* --- 卡片内容 --- */
+.card-body {
+  padding: 1.2rem 1.5rem 1.5rem;
 }
 
-.status-1 {
-  background-color: #4CAF50;
-}
-
-.status-2 {
-  background-color: #FF9800;
-}
-
-.novel-info {
-  padding: 1.5rem;
-}
-
-.novel-title {
-  margin: 0 0 0.8rem 0;
-  font-size: 1.2rem;
-  font-weight: bold;
+.book-title {
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #333;
+  margin: 0 0 0.5rem;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.novel-desc {
-  margin: 0 0 1rem 0;
-  color: #666;
+.book-desc {
+  font-size: 0.85rem;
+  color: #888;
   line-height: 1.5;
-  font-size: 0.9rem;
+  height: 2.55em; /* 限制两行 */
+  overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 2.8rem;
+  margin: 0 0 1rem;
 }
 
-.novel-meta {
-  margin-bottom: 1rem;
-}
-
-.last-chapter {
-  display: block;
-  font-size: 0.85rem;
+.book-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
   color: #667eea;
+  margin-bottom: 1rem;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.novel-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+.book-meta svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* --- 统计数据 --- */
+.book-stats {
+  display: flex;
+  justify-content: space-between;
   padding-top: 1rem;
   border-top: 1px solid #f0f0f0;
 }
@@ -550,67 +589,67 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #999;
 }
 
-.stat-icon {
-  font-size: 1.2rem;
+.stat-item svg {
+  width: 16px;
+  height: 16px;
+  stroke: #999;
 }
 
-.stat-value {
-  font-size: 0.85rem;
-  color: #666;
-  font-weight: 500;
+.stat-item.highlight svg {
+  stroke: none;
+  fill: #f1c40f;
+  color: #f1c40f;
 }
 
+.stat-item span {
+  font-weight: 600;
+}
+
+/* --- 页脚 --- */
 .page-footer {
   text-align: center;
-  padding-top: 2rem;
-  margin-top: 2rem;
-  border-top: 2px solid #e0e0e0;
+  padding-top: 3rem;
+  color: #aaa;
+  font-size: 0.9rem;
 }
 
-.page-footer p {
-  color: #999;
-  font-size: 1rem;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
+/* --- 响应式 --- */
 @media (max-width: 768px) {
-  .novel-list-container {
-    padding: 1rem;
-  }
-
-  .page-header {
+  .toolbar {
     flex-direction: column;
-    gap: 1.5rem;
     align-items: stretch;
   }
 
-  .page-header h2 {
-    font-size: 1.5rem;
-  }
-
-  .header-actions {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .filter-group {
-    flex-direction: column;
+    width: 100%;
+  }
+
+  .select-wrapper {
+    flex: 1;
+  }
+
+  .select-wrapper select {
+    width: 100%;
   }
 
   .search-box {
     width: 100%;
+    margin-top: 1rem;
   }
 
   .search-box input {
     flex: 1;
     width: 100%;
-  }
-
-  .novel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
   }
 }
 </style>

@@ -3,7 +3,7 @@
     <div class="page-header">
       <div class="header-left">
         <router-link :to="`/novel/detail/${novelId}`" class="btn-back">← 返回小说详情</router-link>
-        <h2>💬 评论列表</h2>
+        <h2>评论列表</h2>
       </div>
       <div class="comment-count">共 {{ comments.length }} 条评论</div>
     </div>
