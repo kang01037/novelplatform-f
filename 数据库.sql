@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `novel` (
     `novel_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '小说 ID',
     `novel_name` VARCHAR(200) NOT NULL COMMENT '小说名称',
     `author_id` BIGINT NOT NULL COMMENT '作者 ID',
-    `category_id` BIGINT NOT NULL COMMENT '分类 ID',
+    `category_id` BIGINT NOT NULL COMMENT '1，玄幻奇幻，2，武侠仙侠，3，都市言情，4，科幻灵异，5，历史军事，6，游戏竞技',
     `cover_image` VARCHAR(255) DEFAULT NULL COMMENT '封面图片 URL',
     `content` TEXT COMMENT '详细介绍',
     `novel_status` TINYINT DEFAULT 0 COMMENT '状态 0-连载中 1-已完结 2-暂停',

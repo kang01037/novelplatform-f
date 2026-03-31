@@ -1,4 +1,3 @@
-NEW_FILE_CODE
 <template>
   <div class="unauthorized-container">
     <div class="error-content">

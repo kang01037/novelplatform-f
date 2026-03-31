@@ -54,8 +54,7 @@
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+<script setup>import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { chapterApi } from '../../api'
 
@@ -63,6 +62,7 @@ const route = useRoute()
 const router = useRouter()
 const saving = ref(false)
 const isEdit = ref(false)
+const nextChapterNum = ref(1)
 
 const form = reactive({
   chapterId: null,
@@ -73,6 +73,26 @@ const form = reactive({
 })
 
 const isEditId = computed(() => route.params.chapterId)
+
+// 获取最新章节号
+const loadNextChapterNum = async (novelId) => {
+  try {
+    const response = await chapterApi.getChaptersByNovel(novelId)
+    if (response.data.code === 200 || response.data.message === 'success') {
+      const chapters = response.data.data || []
+      if (chapters.length > 0) {
+        // 找到最大的章节号
+        const maxChapterNum = Math.max(...chapters.map(c => c.chapterNum || 0))
+        nextChapterNum.value = maxChapterNum + 1
+      } else {
+        nextChapterNum.value = 1
+      }
+    }
+  } catch (error) {
+    console.error('获取最新章节号失败:', error)
+    nextChapterNum.value = 1
+  }
+}
 
 const loadChapter = async (chapterId) => {
   try {
@@ -113,7 +133,7 @@ const saveChapter = async () => {
 
     // 自动计算章节号（如果是新建）
     if (!form.chapterNum && !isEdit.value) {
-      form.chapterNum = 1 // TODO: 实际应该查询最新章节号 +1
+      form.chapterNum = nextChapterNum.value
     }
 
     // 如果没有 wordCount，自动计算
@@ -138,6 +158,8 @@ const saveChapter = async () => {
       if (!isEdit.value) {
         isEdit.value = true
         form.chapterId = response.data.data?.chapterId || form.chapterId
+        // 更新下一个章节号
+        nextChapterNum.value = form.chapterNum + 1
       }
     } else {
       alert(response.data.message || '保存失败')
@@ -159,6 +181,7 @@ const saveChapter = async () => {
         if (!isEdit.value) {
           isEdit.value = true
           form.chapterId = data?.chapterId || form.chapterId
+          nextChapterNum.value = form.chapterNum + 1
         }
         return
       }
@@ -195,7 +218,7 @@ const publishChapter = async () => {
 
     // 自动计算章节号（如果是新建）
     if (!form.chapterNum && !isEdit.value) {
-      form.chapterNum = 1 // TODO: 实际应该查询最新章节号 +1
+      form.chapterNum = nextChapterNum.value
     }
 
     // 如果没有 wordCount，自动计算
@@ -257,7 +280,7 @@ const goBack = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   const chapterId = route.params.chapterId
   const novelId = route.params.novelId
 
@@ -266,6 +289,9 @@ onMounted(() => {
   } else if (novelId) {
     form.novelId = novelId
     isEdit.value = false
+    // 获取最新章节号
+    await loadNextChapterNum(novelId)
+    console.log('下一章章节号:', nextChapterNum.value)
   }
 })
 </script>

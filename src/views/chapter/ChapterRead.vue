@@ -1,13 +1,18 @@
 <template>
-  <div class="chapter-read-container" :class="{ 'night-mode': isNightMode }">
-    <div class="reader-header">
+  <div class="chapter-read-container" :class="{ 'night-mode': isNightMode, 'fullscreen': isFullscreen }">
+    <div class="reader-header" :class="{ 'fullscreen-header': isFullscreen }">
       <div class="header-left">
-        <button class="btn" @click="router.back()">返回</button>
+        <button class="btn" @click="goBack">返回</button>
       </div>
       <div class="header-center">
         <h3>{{ chapter?.chapterTitle || '阅读中' }}</h3>
       </div>
       <div class="header-right">
+        <button class="btn fullscreen-btn" @click="toggleFullscreen">
+          <span v-if="!isFullscreen">🔍</span>
+          <span v-else>🔎</span>
+          {{ isFullscreen ? '退出全屏' : '沉浸式阅读' }}
+        </button>
         <button class="btn" @click="showSettings = !showSettings">设置</button>
       </div>
     </div>
@@ -23,7 +28,7 @@
     </div>
 
     <div v-else-if="chapter" class="reader-content">
-      <div class="chapter-body" :style="{ fontSize: `${fontSize}px`, backgroundColor: isNightMode ? '#333' : bgColor, color: isNightMode ? '#eee' : '#333' }">
+      <div class="chapter-body" :style="chapterBodyStyle">
         <h2 class="chapter-title">{{ chapter.chapterTitle }}</h2>
         <div class="chapter-meta">
           <span class="word-count">{{ chapter.wordCount }}字</span>
@@ -103,13 +108,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { chapterApi, bookshelfApi } from '../../api'
 
 const route = useRoute()
 const router = useRouter()
-let chapterId = route.params.chapterId
+const chapterId = ref(route.params.chapterId)
 const chapter = ref(null)
 const chapters = ref([])
 const currentIndex = ref(0)
@@ -119,14 +124,69 @@ const showSettings = ref(false)
 const fontSize = ref(16)
 const isNightMode = ref(false)
 const bgColor = ref('#ffffff')
+const isFullscreen = ref(false)
+
+// 章节内容样式计算
+const chapterBodyStyle = computed(() => {
+  const baseStyle = {
+    fontSize: `${fontSize.value}px`,
+    backgroundColor: bgColor.value,
+    color: isNightMode.value ? '#eee' : '#333'
+  }
+
+  if (isNightMode.value) {
+    baseStyle.backgroundColor = '#333'
+  }
+
+  return baseStyle
+})
+
+// 全屏切换函数 - 增强版本
+const toggleFullscreen = async () => {
+  try {
+    if (!document.fullscreenElement) {
+      // 进入全屏
+      const element = document.querySelector('.chapter-read-container')
+      if (element) {
+        await element.requestFullscreen()
+        isFullscreen.value = true
+        document.body.style.overflow = 'hidden'
+      }
+    } else {
+      // 退出全屏
+      await document.exitFullscreen()
+      isFullscreen.value = false
+      document.body.style.overflow = 'auto'
+    }
+  } catch (err) {
+    console.error('全屏切换失败:', err)
+    // 如果浏览器不支持全屏 API，使用模拟全屏
+    isFullscreen.value = !isFullscreen.value
+  }
+}
+
+// 监听全屏变化
+const onFullscreenChange = () => {
+  isFullscreen.value = !!document.fullscreenElement
+}
+
+// 返回按钮
+const goBack = () => {
+  const lastRoute = localStorage.getItem('lastRoute')
+  if (lastRoute) {
+    router.push(lastRoute)
+  } else {
+    router.back()
+  }
+}
 
 const getChapterDetail = async () => {
   try {
     loading.value = true
     error.value = ''
 
-    console.log('开始获取章节详情，chapterId:', chapterId)
-    const response = await chapterApi.getChapter(chapterId)
+    console.log('开始获取章节详情，chapterId:', chapterId.value)
+    const response = await chapterApi.getChapter(chapterId.value)
     console.log('章节详情响应:', response)
     console.log('响应数据:', response.data)
 
@@ -180,7 +240,7 @@ const getChaptersByNovel = async () => {
       console.log('章节数量:', chapters.value.length)
 
       // 找到当前章节的索引
-      currentIndex.value = chapters.value.findIndex(c => c.chapterId === parseInt(chapterId))
+      currentIndex.value = chapters.value.findIndex(c => c.chapterId === parseInt(chapterId.value))
       console.log('当前章节索引:', currentIndex.value)
     } else {
       console.error('获取章节列表失败:', response.data)
@@ -240,25 +300,28 @@ const hasNextChapter = computed(() => {
   return currentIndex.value < chapters.value.length - 1
 })
 
-const readerStyle = computed(() => {
-  return {
-    fontSize: `${fontSize.value}px`,
-    backgroundColor: isNightMode.value ? '#222' : bgColor.value,
-    color: isNightMode.value ? '#eee' : '#333'
-  }
-})
-
 // 监听路由变化，重新加载章节
 watch(() => route.params.chapterId, (newChapterId) => {
   if (newChapterId) {
-    chapterId = newChapterId
+    chapterId.value = newChapterId
     getChapterDetail()
   }
 })
 
+// 添加事件监听
 onMounted(() => {
-  console.log('ChapterRead 组件已挂载，chapterId:', chapterId)
+  document.addEventListener('fullscreenchange', onFullscreenChange)
+  console.log('ChapterRead 组件已挂载，chapterId:', chapterId.value)
   getChapterDetail()
+})
+
+// 清理事件监听
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', onFullscreenChange)
+  if (document.fullscreenElement) {
+    document.exitFullscreen()
+  }
+  document.body.style.overflow = 'auto'
 })
 </script>
 
@@ -275,11 +338,76 @@ onMounted(() => {
   background-color: #f8f9fa;
   color: #333;
   transition: all 0.3s;
+  z-index: 9999 !important;
 }
 
 .chapter-read-container.night-mode {
-  background-color: #222;
+  background-color: #1a1a1a;
   color: #eee;
+}
+
+/* 全屏模式样式 */
+.chapter-read-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  z-index: 10000 !important;
+}
+
+.chapter-read-container.fullscreen .reader-header {
+  background-color: rgba(0, 0, 0, 0.8);
+  border: none;
+  box-shadow: none;
+}
+
+.chapter-read-container.fullscreen .reader-header .btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.chapter-read-container.fullscreen .reader-header .btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.chapter-read-container.fullscreen .reader-content {
+  padding: 0;
+}
+
+.chapter-read-container.fullscreen .chapter-body {
+  padding: 4rem 15%;
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.chapter-read-container.fullscreen .chapter-nav {
+  padding: 0 15% 4rem;
+}
+
+/* 全屏模式下的夜间模式优化 */
+.chapter-read-container.fullscreen.night-mode {
+  background-color: #0a0a0a;
+}
+
+.chapter-read-container.fullscreen.night-mode .reader-header {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.chapter-read-container.fullscreen.night-mode .reader-header .btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #eee;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.chapter-read-container.fullscreen.night-mode .reader-header .btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .reader-header {
@@ -293,6 +421,16 @@ onMounted(() => {
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+}
+
+.reader-header.fullscreen-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  z-index: 101;
 }
 
 .reader-header h3 {
@@ -302,8 +440,8 @@ onMounted(() => {
 }
 
 .chapter-read-container.night-mode .reader-header {
-  background-color: #333;
-  border-bottom-color: #444;
+  background-color: #2a2a2a;
+  border-bottom-color: #3a3a3a;
 }
 
 .chapter-read-container.night-mode .reader-header h3 {
@@ -343,6 +481,16 @@ onMounted(() => {
 
 .chapter-read-container.night-mode .btn:hover:not(:disabled) {
   background: #555555;
+}
+
+.fullscreen-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.fullscreen-btn:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
 .loading-container,

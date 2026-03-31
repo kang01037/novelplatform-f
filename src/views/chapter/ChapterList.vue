@@ -11,12 +11,12 @@
     </div>
 
     <div v-else-if="chapters.length === 0" class="empty-container">
-      <p class="empty-message">😕 暂无章节</p>
+      <p class="empty-message">暂无章节</p>
     </div>
 
     <template v-else>
       <div class="page-header">
-        <h2>📖 {{ novelName }} - 章节列表</h2>
+        <h2>{{ novelName }} - 章节列表</h2>
         <div class="chapter-count">共 {{ chapters.length }} 章</div>
       </div>
 

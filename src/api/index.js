@@ -86,7 +86,8 @@ export const commentApi = {
   deleteComment: (commentId) => api.delete(`/comment/delete/${commentId}`),
   batchDeleteComments: (ids) => api.delete('/comment/delete/batch', { data: ids }),
   likeComment: (commentId) => api.post(`/comment/${commentId}/like`),
-  unlikeComment: (commentId) => api.post(`/comment/${commentId}/unlike`)
+  unlikeComment: (commentId) => api.post(`/comment/${commentId}/unlike`),
+  getAllComments: () => api.get('/comment/all'),
 }
 
 export default api

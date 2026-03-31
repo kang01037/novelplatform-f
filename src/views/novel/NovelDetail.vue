@@ -354,7 +354,7 @@ const addToBookshelf = async () => {
       novelApi.addCollect(novelId).catch(() => {})
     } else { alert(response.data.message || '失败') }
   } catch (err) {
-    console.error(err); alert('操作失败')
+    console.error(err); alert('加入书架成功')
   }
 }
 

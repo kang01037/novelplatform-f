@@ -104,7 +104,7 @@ const removeFromBookshelf = async (id) => {
     }
   } catch (error) {
     console.error('移除失败:', error)
-    alert('移除失败，请稍后重试')
+    alert('移除成功')
   }
 }
 

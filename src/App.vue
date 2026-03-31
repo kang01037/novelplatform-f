@@ -11,7 +11,7 @@
     </div>
 
     <!-- 头部导航 -->
-    <header class="app-header glass-effect">
+    <header class="app-header glass-effect" v-if="!isReaderPage && !isAdmin">
       <div class="header-inner">
         <!-- Logo 区域 -->
         <div class="logo-section">

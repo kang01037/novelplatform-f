@@ -96,7 +96,12 @@ const routes = [
     path: '/unauthorized',
     name: 'Unauthorized',
     component: () => import('../views/Unauthorized.vue')
-  }
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'AdminManage',
+    component: () => import('../views/management/AdminManage.vue')
+  },
 ]
 
 // 添加路由过渡效果
