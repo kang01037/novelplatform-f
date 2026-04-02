@@ -77,6 +77,10 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                   加入书架
                 </button>
+                <button class="btn accent" @click="recommendNovel" :disabled="recommending">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                  {{ recommending ? '推荐中...' : `推荐 (${formatNumber(novel.recommendCount)})` }}
+                </button>
                 <button class="btn ghost" @click="showScoreModal = true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   评分
@@ -218,6 +222,8 @@ const loading = ref(false)
 const error = ref('')
 const showScoreModal = ref(false)
 const score = ref(5)
+const recommending = ref(false)
+const hasRecommended = ref(false)
 
 // 评论相关
 const comments = ref([])
@@ -355,6 +361,38 @@ const addToBookshelf = async () => {
     } else { alert(response.data.message || '失败') }
   } catch (err) {
     console.error(err); alert('加入书架成功')
+  }
+}
+
+const recommendNovel = async () => {
+  if (hasRecommended.value) {
+    alert('您已经推荐过这本小说了')
+    return
+  }
+
+  try {
+    recommending.value = true
+    const userId = localStorage.getItem('userId')
+
+    if (!userId) {
+      alert('请先登录后再推荐')
+      router.push('/login')
+      return
+    }
+
+    const response = await novelApi.addRecommend(novelId)
+    if (response.data.code === 200 || response.data.message === 'success') {
+      alert('✅ 推荐成功！感谢您的支持')
+      hasRecommended.value = true
+      novel.value.recommendCount = (novel.value.recommendCount || 0) + 1
+    } else {
+      alert(response.data.message || '推荐失败')
+    }
+  } catch (err) {
+    console.error('推荐失败:', err)
+    alert('推荐失败，请稍后重试')
+  } finally {
+    recommending.value = false
   }
 }
 
@@ -505,6 +543,20 @@ onMounted(() => loadData())
 .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
 .btn.secondary { background: rgba(102, 126, 234, 0.1); color: #667eea; }
 .btn.secondary:hover { background: rgba(102, 126, 234, 0.2); }
+.btn.accent {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+}
+.btn.accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+}
+.btn.accent:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
 .btn.ghost { background: rgba(0,0,0,0.05); color: #666; }
 .btn.ghost:hover { background: rgba(0,0,0,0.1); }
 

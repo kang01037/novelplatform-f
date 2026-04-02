@@ -97,7 +97,7 @@ const removeFromBookshelf = async (id) => {
       })
       if (response.data.code === '200' || response.data.message === 'success') {
         alert('移除成功')
-        getBookshelfItems()
+        await getBookshelfItems()
       } else {
         alert(response.data.message || '移除失败')
       }

@@ -4,7 +4,12 @@
       <template #header>
         <div class="card-header">
           <h2 class="card-title">管理后台</h2>
-          <el-button @click="handleTabChange" :icon="Refresh" circle />
+          <div class="header-actions">
+            <el-button @click="handleTabChange" :icon="Refresh" circle />
+            <el-button @click="logout" :icon="SwitchButton" type="danger" plain>
+              退出登录
+            </el-button>
+          </div>
         </div>
       </template>
 
@@ -531,6 +536,21 @@ const handleNovelPageChange = (page) => {
 const handleCommentPageChange = (page) => {
   commentPagination.value.page = page
   getCommentList()
+}
+
+const logout = () => {
+  // 清空所有本地存储数据
+  localStorage.removeItem('token')
+  localStorage.removeItem('username')
+  localStorage.removeItem('userId')
+  localStorage.removeItem('userStatus')
+  localStorage.removeItem('userInfo')
+
+  // 清空 sessionStorage 中的数据（如果有）
+  sessionStorage.clear()
+
+  // 跳转到登录页
+  router.push('/login')
 }
 
 onMounted(() => {
