@@ -44,6 +44,8 @@ import { userApi } from '../../api'
 
 const router = useRouter()
 const loading = ref(false)
+const showRoleSelect = ref(false)
+const userStatus = ref(1)
 const form = ref({
   username: '',
   password: ''
@@ -64,52 +66,40 @@ const handleLogin = async () => {
 
     const { code, message, data } = response.data
 
-    // 判断登录是否成功（兼容后端返回 401 但业务成功的情况）
-    if ((code === 200 || message === 'success') && data) {
-      // 保存 token
-      if (typeof data === 'string') {
-        localStorage.setItem('token', data)
+    // 判断登录是否成功
+    if (code === 200 && data) {
+      // 后端返回结构：data = { userInfo: {...}, token: "..." }
+
+      // 1. 保存 token
+      if (data.token) {
+        localStorage.setItem('token', data.token)
+        console.log('Token 已保存:', data.token)
       }
 
-      // 获取用户详细信息（包括 userStatus）
-      try {
-        const userInfoResponse = await userApi.getUserByUsername(form.value.username)
-        console.log('用户信息响应:', userInfoResponse)
+      // 2. 保存用户信息
+      if (data.userInfo) {
+        const userInfo = data.userInfo
 
-        if (userInfoResponse.data.code === 200 && userInfoResponse.data.data) {
-          const userInfo = userInfoResponse.data.data
+        localStorage.setItem('userId', userInfo.userId)
+        localStorage.setItem('username', userInfo.username)
+        localStorage.setItem('userStatus', userInfo.userStatus)
+        localStorage.setItem('userInfo', JSON.stringify(userInfo))
 
-          // 保存用户信息到 localStorage
-          localStorage.setItem('userId', userInfo.userId)
-          localStorage.setItem('username', userInfo.username)
-          localStorage.setItem('userStatus', userInfo.userStatus)  // 重要！
-          localStorage.setItem('userInfo', JSON.stringify(userInfo))
+        console.log('用户信息已保存:', userInfo)
 
-          console.log('登录成功，用户状态:', userInfo.userStatus)
-          alert('登录成功')
+        // 3. 根据用户角色跳转
+        const status = parseInt(userInfo.userStatus)
+        alert('登录成功')
 
-          // 根据用户角色跳转
-          const userStatus = parseInt(userInfo.userStatus)
-          if (userStatus >= 3) {
-            router.push('/admin/dashboard')
-          } else if (userStatus === 2) {
-            router.push('/writer/dashboard')
-          } else {
-            router.push('/')
-          }
+        if (status >= 3) {
+          router.push('/admin/dashboard')
+        } else if (status === 2) {
+          router.push('/writer/novels')
         } else {
-          // 如果查询失败，至少保存用户名
-          localStorage.setItem('username', form.value.username)
-          localStorage.setItem('token', data)
-          alert('登录成功')
           router.push('/')
         }
-      } catch (queryError) {
-        console.error('查询用户信息失败:', queryError)
-        // 即使查询失败，也保存用户名和 token
-        localStorage.setItem('username', form.value.username)
-        localStorage.setItem('token', data)
-        alert('登录成功')
+      } else {
+        alert('登录成功，但未返回用户信息')
         router.push('/')
       }
     } else {
@@ -118,51 +108,48 @@ const handleLogin = async () => {
   } catch (error) {
     console.error('登录失败:', error)
 
-    // 即使 HTTP 状态码错误，也检查响应数据
+    // 处理 HTTP 错误响应
     if (error.response) {
       const { data, status } = error.response
       console.error('错误响应:', data, status)
 
-      // 兼容后端返回 401 但业务成功的情况
+      // 兼容后端返回 HTTP 错误但业务成功的情况
       if (data && data.code === 200 && data.data) {
+        const responseData = data.data
+
         // 保存 token
-        if (typeof data.data === 'string') {
-          localStorage.setItem('token', data.data)
+        if (responseData.token) {
+          localStorage.setItem('token', responseData.token)
         }
 
-        // 获取用户信息
-        try {
-          const userInfoResponse = await userApi.getUserByUsername(form.value.username)
-          if (userInfoResponse.data.code === 200 && userInfoResponse.data.data) {
-            const userInfo = userInfoResponse.data.data
-            localStorage.setItem('userId', userInfo.userId)
-            localStorage.setItem('username', userInfo.username)
-            localStorage.setItem('userStatus', userInfo.userStatus)
-            localStorage.setItem('userInfo', JSON.stringify(userInfo))
+        // 保存用户信息
+        if (responseData.userInfo) {
+          const userInfo = responseData.userInfo
+          localStorage.setItem('userId', userInfo.userId)
+          localStorage.setItem('username', userInfo.username)
+          localStorage.setItem('userStatus', userInfo.userStatus)
+          localStorage.setItem('userInfo', JSON.stringify(userInfo))
 
-            const userStatus = parseInt(userInfo.userStatus)
-            if (userStatus >= 3) {
-              router.push('/admin/dashboard')
-            } else if (userStatus === 2) {
-              router.push('/writer/dashboard')
-            } else {
-              router.push('/')
-            }
-            return
+          const status = parseInt(userInfo.userStatus)
+          alert('登录成功')
+
+          if (status >= 3) {
+            router.push('/admin/dashboard')
+          } else if (status === 2) {
+            router.push('/writer/novels')
+          } else {
+            router.push('/')
           }
-        } catch (e) {
-          console.error('获取用户信息失败:', e)
+          return
         }
 
-        // 如果获取用户信息失败，至少保存基本信息
-        localStorage.setItem('username', form.value.username)
-        alert('登录成功，但获取用户信息失败')
+        alert('登录成功，但未返回用户信息')
         router.push('/')
         return
       }
 
-      const { code, message } = data
-      alert(`登录失败：${message || '用户名或密码错误'}`)
+      const errorMsg = data?.message || '用户名或密码错误'
+      alert(`登录失败：${errorMsg}`)
     } else if (error.request) {
       console.error('请求发送失败:', error.request)
       alert('登录失败：无法连接到服务器，请检查网络')
@@ -173,8 +160,23 @@ const handleLogin = async () => {
     loading.value = false
   }
 }
-</script>
 
+// 角色选择（预留功能）
+const selectRole = (role) => {
+  showRoleSelect.value = false
+  switch(role) {
+    case 'home':
+      router.push('/')
+      break
+    case 'writer':
+      router.push('/writer/novels')
+      break
+    case 'admin':
+      router.push('/admin/dashboard')
+      break
+  }
+}
+</script>
 
 <style scoped>
 .login-container {

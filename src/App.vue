@@ -284,7 +284,7 @@ watch(() => route.path, () => {
 }
 
 .glass-effect-dark {
-  background: rgba(102, 126, 234, 0.85);
+  background: rgba(227, 121, 237, 0.35);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   color: white;
@@ -392,7 +392,7 @@ watch(() => route.path, () => {
 
 .btn-ghost {
   padding: 0.5rem 1.2rem;
-  color: #667eea;
+  color: rgba(236, 49, 255, 0.79);
   text-decoration: none;
   font-weight: 600;
   border-radius: 6px;
@@ -415,6 +415,7 @@ watch(() => route.path, () => {
 .btn-primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+  color: rgba(236, 49, 255, 0.79);
 }
 
 /* 用户下拉菜单 */
@@ -426,7 +427,7 @@ watch(() => route.path, () => {
 .user-avatar {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  background: linear-gradient(135deg, rgba(248, 82, 241, 0.72) 0%, #fbc2eb 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -540,7 +541,7 @@ watch(() => route.path, () => {
 
 .writer-btn:hover {
   background: white;
-  color: #764ba2;
+  color: rgba(255, 121, 208, 0.78);
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 

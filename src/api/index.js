@@ -5,6 +5,25 @@ const api = axios.create({
   timeout: 10000
 })
 
+// 添加请求拦截器
+api.interceptors.request.use(config => {
+  console.log('API 请求:', config.method.toUpperCase(), config.url)
+  return config
+}, error => {
+  console.error('请求错误:', error)
+  return Promise.reject(error)
+})
+
+// 添加响应拦截器
+api.interceptors.response.use(response => {
+  console.log('API 响应:', response.config.url, response.status)
+  return response
+}, error => {
+  console.error('响应错误:', error.message, error.response?.status)
+  return Promise.reject(error)
+})
+
+
 // 用户模块
 export const userApi = {
   getUser: (userId) => api.get(`/user/${userId}`),

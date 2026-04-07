@@ -180,11 +180,10 @@ const getNovels = async () => {
     loading.value = true
     loadError.value = ''
 
-    // 保持原有的请求逻辑不变
     const response = await axios.get('/api/novel/list', {
-      baseURL: 'http://localhost:5173',
       timeout: 10000
     })
+
 
     if (response.status === 200) {
       const { code, message, data } = response.data
