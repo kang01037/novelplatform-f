@@ -138,7 +138,7 @@
             ></textarea>
             <button
                 class="submit-btn"
-                @click="submitComment"
+                @click="debouncedSubmitComment"
                 :disabled="submitting || !newComment.content.trim()"
             >
               {{ submitting ? '发送中...' : '发表评论' }}
@@ -164,7 +164,7 @@
                   </div>
                   <div class="comment-content">{{ comment.content }}</div>
                   <div class="comment-actions">
-                    <button @click="likeComment(comment.commentId)" :class="{ liked: comment.isLiked }">
+                    <button @click="throttledLike(comment.commentId)" :class="{ liked: comment.isLiked }">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
                       {{ comment.likeCount || 0 }}
                     </button>
@@ -212,6 +212,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 // 假设 API 引入路径正确，保持不变
 import { novelApi, chapterApi, bookshelfApi, commentApi, userApi } from '../../api'
+import { debounce, throttle } from '../../utils'
 
 const route = useRoute()
 const router = useRouter()
@@ -313,6 +314,16 @@ const likeComment = async (commentId) => {
     liking.value = false
   }
 }
+
+// 防抖包装：发表评论
+const debouncedSubmitComment = debounce(() => {
+  submitComment()
+}, 300)
+
+// 节流包装：点赞
+const throttledLike = throttle((commentId) => {
+  likeComment(commentId)
+}, 500, { leading: true, trailing: false })
 
 const getNovelStatusText = (status) => {
   const map = { 0: '连载中', 1: '已完结', 2: '暂停' }
@@ -419,7 +430,6 @@ onMounted(() => loadData())
 /* --- 页面布局 --- */
 .novel-detail-page {
   position: relative;
-  background: #f8f9fa;
   min-height: 100vh;
   padding-bottom: 4rem;
 }
@@ -430,7 +440,7 @@ onMounted(() => loadData())
   width: 100%; height: 350px;
   background-size: cover;
   background-position: center;
-  filter: blur(30px) brightness(1.1);
+  filter: blur(30px) brightness(0.5);
   transform: scale(1.1);
   z-index: 0;
 }
@@ -438,7 +448,7 @@ onMounted(() => loadData())
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: linear-gradient(to bottom, rgba(248,249,250,0) 0%, rgba(248,249,250,0.8) 50%, rgba(248,249,250,1) 100%);
+  background: linear-gradient(to bottom, rgba(15,25,35,0) 0%, rgba(15,25,35,0.8) 50%, rgba(15,25,35,1) 100%);
 }
 
 .content-wrapper {
@@ -451,11 +461,11 @@ onMounted(() => loadData())
 
 /* --- 玻璃卡片 --- */
 .glass-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   margin-bottom: 1.5rem;
   overflow: hidden;
 }
@@ -476,7 +486,7 @@ onMounted(() => loadData())
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3);
 }
 .cover-wrapper img {
   width: 100%; height: 100%;
@@ -484,7 +494,7 @@ onMounted(() => loadData())
 }
 .cover-placeholder {
   width: 100%; height: 100%;
-  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   display: flex; align-items: center; justify-content: center;
   font-size: 4rem; color: white; font-weight: bold;
 }
@@ -497,18 +507,18 @@ onMounted(() => loadData())
   color: white;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
-.status-0 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.status-0 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 .status-1 { background: #00b894; }
 .status-2 { background: #fdcb6e; color: #333; }
 
 .info-wrapper { flex: 1; display: flex; flex-direction: column; }
-.novel-title { font-size: 1.8rem; margin: 0 0 0.8rem; color: #333; font-weight: 700; }
+.novel-title { font-size: 1.8rem; margin: 0 0 0.8rem; color: rgba(255, 255, 255, 0.85); font-weight: 700; }
 .meta-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
 .meta-item {
   display: flex; align-items: center; gap: 0.3rem;
-  color: #666; font-size: 0.9rem;
+  color: rgba(168, 216, 234, 0.7); font-size: 0.9rem;
 }
-.meta-item svg { width: 16px; height: 16px; color: #888; }
+.meta-item svg { width: 16px; height: 16px; stroke: rgba(168, 216, 234, 0.5); }
 
 .stats-grid {
   display: grid;
@@ -516,15 +526,15 @@ onMounted(() => loadData())
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding: 1rem 0;
-  border-top: 1px solid rgba(0,0,0,0.05);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .stat-box { display: flex; flex-direction: column; align-items: center; }
-.stat-box .val { font-size: 1.2rem; font-weight: 700; color: #333; }
-.stat-box .label { font-size: 0.8rem; color: #888; margin-top: 4px; }
-.stat-box.highlight .val { color: #667eea; }
+.stat-box .val { font-size: 1.2rem; font-weight: 700; color: rgba(255, 255, 255, 0.85); }
+.stat-box .label { font-size: 0.8rem; color: rgba(168, 216, 234, 0.6); margin-top: 4px; }
+.stat-box.highlight .val { color: #4facfe; }
 
-.action-buttons { display: flex; gap: 1rem; margin-top: auto; }
+.action-buttons { display: flex; gap: 1rem; margin-top: auto; flex-wrap: wrap; }
 .btn {
   display: flex; align-items: center; justify-content: center; gap: 0.5rem;
   padding: 0.8rem 1.5rem;
@@ -536,98 +546,102 @@ onMounted(() => loadData())
 }
 .btn svg { width: 18px; height: 18px; }
 .btn.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
 }
-.btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
-.btn.secondary { background: rgba(102, 126, 234, 0.1); color: #667eea; }
-.btn.secondary:hover { background: rgba(102, 126, 234, 0.2); }
+.btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4); }
+.btn.secondary { background: rgba(79, 172, 254, 0.1); color: #4facfe; }
+.btn.secondary:hover { background: rgba(79, 172, 254, 0.2); }
 .btn.accent {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
 }
 .btn.accent:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+  box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
 }
 .btn.accent:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
-.btn.ghost { background: rgba(0,0,0,0.05); color: #666; }
-.btn.ghost:hover { background: rgba(0,0,0,0.1); }
+.btn.ghost { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.7); }
+.btn.ghost:hover { background: rgba(255, 255, 255, 0.12); }
 
 /* --- 内容卡片通用 --- */
 .intro-card, .chapter-card, .comment-card { padding: 1.5rem 2rem; }
 .card-title {
-  font-size: 1.1rem; color: #333;
+  font-size: 1.1rem; color: rgba(255, 255, 255, 0.85);
   margin: 0 0 1rem;
   display: flex; align-items: center; gap: 0.5rem;
 }
-.card-title svg { width: 20px; height: 20px; color: #667eea; }
+.card-title svg { width: 20px; height: 20px; stroke: #4facfe; }
 .card-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 1rem;
 }
-.update-time { font-size: 0.8rem; color: #999; }
+.update-time { font-size: 0.8rem; color: rgba(168, 216, 234, 0.5); }
 
-.intro-text { color: #555; line-height: 1.8; font-size: 0.95rem; white-space: pre-wrap; }
+.intro-text { color: rgba(168, 216, 234, 0.7); line-height: 1.8; font-size: 0.95rem; white-space: pre-wrap; }
 
 /* --- 章节区域 --- */
 .latest-chapter-box {
-  background: #f9f9ff;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
 }
 .chapter-link {
   display: flex; align-items: center;
-  color: #333; text-decoration: none;
+  color: rgba(255, 255, 255, 0.85); text-decoration: none;
 }
-.chapter-link .num { color: #667eea; font-weight: 600; margin-right: 0.8rem; }
-.chapter-link .title { flex: 1; font-weight: 500; }
-.chapter-link svg { width: 20px; height: 20px; color: #ccc; transition: transform 0.3s; }
-.chapter-link:hover svg { transform: translateX(5px); color: #667eea; }
+.chapter-link .num { color: #4facfe; font-weight: 600; margin-right: 0.8rem; }
+.chapter-link .title { flex: 1; font-weight: 500; color: rgba(255, 255, 255, 0.7); }
+.chapter-link svg { width: 20px; height: 20px; stroke: rgba(255, 255, 255, 0.2); transition: transform 0.3s; }
+.chapter-link:hover svg { transform: translateX(5px); stroke: #4facfe; }
 
 .view-all-btn {
   width: 100%;
   background: transparent;
-  border: 1px dashed #ddd;
-  color: #667eea;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  color: #4facfe;
   padding: 0.8rem;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s;
 }
-.view-all-btn:hover { background: rgba(102, 126, 234, 0.05); border-color: #667eea; }
+.view-all-btn:hover { background: rgba(79, 172, 254, 0.08); border-color: #4facfe; }
 
 /* --- 评论区 --- */
 .comment-form {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .comment-form textarea {
   width: 100%;
-  background: #f5f7fa;
-  border: 1px solid #eee;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 1rem;
   font-size: 0.95rem;
   resize: none;
   margin-bottom: 0.8rem;
   transition: border-color 0.3s;
+  color: rgba(255, 255, 255, 0.85);
+}
+.comment-form textarea::placeholder {
+  color: rgba(168, 216, 234, 0.4);
 }
 .comment-form textarea:focus {
   outline: none;
-  border-color: #a18cd1;
+  border-color: #4facfe;
 }
 .submit-btn {
   float: right;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
   padding: 0.5rem 1.5rem;
@@ -642,7 +656,7 @@ onMounted(() => loadData())
 .user-avatar img, .avatar-placeholder {
   width: 40px; height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   display: flex; align-items: center; justify-content: center;
   font-weight: bold;
@@ -653,33 +667,38 @@ onMounted(() => loadData())
   display: flex; justify-content: space-between;
   margin-bottom: 0.3rem;
 }
-.username { font-weight: 600; color: #333; }
-.time { font-size: 0.8rem; color: #aaa; }
-.comment-content { color: #555; line-height: 1.6; font-size: 0.9rem; }
+.username { font-weight: 600; color: rgba(255, 255, 255, 0.85); }
+.time { font-size: 0.8rem; color: rgba(168, 216, 234, 0.5); }
+.comment-content { color: rgba(168, 216, 234, 0.7); line-height: 1.6; font-size: 0.9rem; }
 .comment-actions { margin-top: 0.5rem; }
 .comment-actions button {
-  background: none; border: none; color: #999;
+  background: none; border: none; color: rgba(168, 216, 234, 0.5);
   cursor: pointer; display: flex; align-items: center; gap: 4px;
   font-size: 0.85rem; padding: 0;
 }
 .comment-actions button svg { width: 16px; height: 16px; }
-.comment-actions button:hover { color: #667eea; }
-.comment-actions button.liked { color: #ff4757; }
+.comment-actions button:hover { color: #4facfe; }
+.comment-actions button.liked { color: #4facfe; }
 
 .view-more-link {
   display: block;
   text-align: center;
-  color: #667eea;
+  color: #4facfe;
   text-decoration: none;
   margin-top: 1rem;
   font-weight: 500;
+}
+
+.comment-count {
+  color: rgba(168, 216, 234, 0.6);
+  font-size: 0.85rem;
 }
 
 /* --- 模态框 --- */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.6);
   display: flex; align-items: center; justify-content: center;
   z-index: 1000;
 }
@@ -687,25 +706,30 @@ onMounted(() => loadData())
   width: 320px;
   padding: 2rem;
   text-align: center;
-  background: white;
+  background: rgba(15, 25, 35, 0.95);
+}
+.modal-content h3 {
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
 }
 .stars-selector { display: flex; justify-content: center; gap: 0.5rem; margin: 1.5rem 0; }
-.star { cursor: pointer; color: #ddd; transition: transform 0.2s; }
+.star { cursor: pointer; color: rgba(255, 255, 255, 0.15); transition: transform 0.2s; }
 .star svg { width: 32px; height: 32px; }
 .star.active { color: #f1c40f; transform: scale(1.1); }
-.score-display { font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 1.5rem; }
+.score-display { font-size: 1.5rem; font-weight: bold; color: rgba(255, 255, 255, 0.85); margin-bottom: 1.5rem; }
 .modal-actions { display: flex; gap: 1rem; }
 .modal-actions .btn { flex: 1; padding: 0.6rem; }
-.modal-actions .cancel { background: #f0f2f5; color: #666; }
-.modal-actions .confirm { background: #667eea; color: white; }
+.modal-actions .cancel { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.7); }
+.modal-actions .confirm { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
 
 /* --- 其他 --- */
-.state-box { text-align: center; padding: 5rem 2rem; color: #888; }
-.spinner { width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+.state-box { text-align: center; padding: 5rem 2rem; color: rgba(168, 216, 234, 0.6); }
+.state-box.error { color: #ff6b81; }
+.spinner { width: 40px; height: 40px; border: 3px solid rgba(255, 255, 255, 0.08); border-top-color: #4facfe; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
 .spinner.small { width: 20px; height: 20px; border-width: 2px; }
 .loading-inline { padding: 2rem; text-align: center; }
-.empty-text { text-align: center; color: #999; padding: 1rem; }
-.retry-btn { margin-top: 1rem; background: #667eea; color: white; border: none; padding: 0.5rem 2rem; border-radius: 20px; cursor: pointer; }
+.empty-text { text-align: center; color: rgba(168, 216, 234, 0.4); padding: 1rem; }
+.retry-btn { margin-top: 1rem; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; padding: 0.5rem 2rem; border-radius: 20px; cursor: pointer; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }

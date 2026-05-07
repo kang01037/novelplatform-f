@@ -106,7 +106,7 @@ onMounted(() => {
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #f8f9fa;
+  background: transparent;
   min-height: 100vh;
 }
 
@@ -124,54 +124,51 @@ onMounted(() => {
 .loading-spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border: 4px solid rgba(255, 255, 255, 0.08);
+  border-top: 4px solid #4facfe;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .loading-container p {
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
   font-size: 1.1rem;
 }
 
 .error-message {
-  color: #f44336;
+  color: #ff6b81;
   font-size: 1.2rem;
   margin-bottom: 1rem;
   white-space: pre-line;
 }
 
 .empty-message {
-  color: #999;
+  color: rgba(168, 216, 234, 0.5);
   font-size: 1.2rem;
 }
 
 .btn-retry {
   padding: 0.8rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s;
   margin-top: 1rem;
+  font-weight: 600;
 }
 
 .btn-retry:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
 }
 
 .page-header {
@@ -180,18 +177,18 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .page-header h2 {
   margin: 0;
   font-size: 1.8rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .chapter-count {
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border-radius: 20px;
   font-size: 0.9rem;
@@ -199,14 +196,16 @@ onMounted(() => {
 }
 
 .chapter-list {
-  background: white;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .chapter-item {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   transition: all 0.3s;
 }
 
@@ -215,7 +214,7 @@ onMounted(() => {
 }
 
 .chapter-item:hover {
-  background-color: #f8f9fa;
+  background: rgba(79, 172, 254, 0.08);
   transform: translateX(5px);
 }
 
@@ -231,14 +230,14 @@ onMounted(() => {
 .chapter-num {
   min-width: 100px;
   font-weight: bold;
-  color: #667eea;
+  color: #4facfe;
   font-size: 1rem;
 }
 
 .chapter-title {
   flex: 1;
   font-size: 1rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -247,7 +246,7 @@ onMounted(() => {
 .chapter-word-count {
   min-width: 80px;
   text-align: right;
-  color: #999;
+  color: rgba(168, 216, 234, 0.5);
   font-size: 0.85rem;
   padding-left: 1rem;
 }

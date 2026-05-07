@@ -77,25 +77,25 @@
           <div class="bg-color-options">
             <div
                 class="bg-color"
-                :style="{ backgroundColor: '#ffffff', border: bgColor === '#ffffff' ? '3px solid #667eea' : '1px solid #ddd' }"
+                :style="{ backgroundColor: '#ffffff', border: bgColor === '#ffffff' ? '3px solid #4facfe' : '1px solid rgba(255,255,255,0.1)' }"
                 @click="bgColor = '#ffffff'"
                 title="白色"
             ></div>
             <div
                 class="bg-color"
-                :style="{ backgroundColor: '#f5f5dc', border: bgColor === '#f5f5dc' ? '3px solid #667eea' : '1px solid #ddd' }"
+                :style="{ backgroundColor: '#f5f5dc', border: bgColor === '#f5f5dc' ? '3px solid #4facfe' : '1px solid rgba(255,255,255,0.1)' }"
                 @click="bgColor = '#f5f5dc'"
                 title="米色"
             ></div>
             <div
                 class="bg-color"
-                :style="{ backgroundColor: '#e6e6fa', border: bgColor === '#e6e6fa' ? '3px solid #667eea' : '1px solid #ddd' }"
+                :style="{ backgroundColor: '#e6e6fa', border: bgColor === '#e6e6fa' ? '3px solid #4facfe' : '1px solid rgba(255,255,255,0.1)' }"
                 @click="bgColor = '#e6e6fa'"
                 title="淡紫"
             ></div>
             <div
                 class="bg-color"
-                :style="{ backgroundColor: '#e8f5e9', border: bgColor === '#e8f5e9' ? '3px solid #667eea' : '1px solid #ddd' }"
+                :style="{ backgroundColor: '#e8f5e9', border: bgColor === '#e8f5e9' ? '3px solid #4facfe' : '1px solid rgba(255,255,255,0.1)' }"
                 @click="bgColor = '#e8f5e9'"
                 title="绿色"
             ></div>
@@ -335,15 +335,14 @@ onUnmounted(() => {
   width: 100vw;
   height: 100vh;
   overflow-y: auto;
-  background-color: #f8f9fa;
-  color: #333;
+  background: linear-gradient(170deg, #0f1923 0%, #1a2a3a 30%, #1e3a4f 60%, #2a4a5f 100%);
+  color: rgba(255, 255, 255, 0.85);
   transition: all 0.3s;
   z-index: 9999 !important;
 }
 
 .chapter-read-container.night-mode {
-  background-color: #1a1a1a;
-  color: #eee;
+  background-color: #0a0a0a;
 }
 
 /* 全屏模式样式 */
@@ -361,7 +360,7 @@ onUnmounted(() => {
 }
 
 .chapter-read-container.fullscreen .reader-header {
-  background-color: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.8);
   border: none;
   box-shadow: none;
 }
@@ -397,7 +396,7 @@ onUnmounted(() => {
 }
 
 .chapter-read-container.fullscreen.night-mode .reader-header {
-  background-color: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.9);
 }
 
 .chapter-read-container.fullscreen.night-mode .reader-header .btn {
@@ -415,12 +414,13 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 0.8rem 2rem;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 25, 35, 0.9);
+  backdrop-filter: blur(20px);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s;
 }
 
@@ -429,19 +429,19 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  background-color: rgba(255, 255, 255, 0.95);
+  background: rgba(15, 25, 35, 0.95);
   z-index: 101;
 }
 
 .reader-header h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .chapter-read-container.night-mode .reader-header {
-  background-color: #2a2a2a;
-  border-bottom-color: #3a3a3a;
+  background: rgba(10, 10, 10, 0.95);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
 }
 
 .chapter-read-container.night-mode .reader-header h3 {
@@ -450,9 +450,9 @@ onUnmounted(() => {
 
 .btn {
   padding: 0.6rem 1.2rem;
-  background: #ffffff;
-  color: #333333;
-  border: 2px solid #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s;
@@ -461,36 +461,25 @@ onUnmounted(() => {
 }
 
 .btn:hover:not(:disabled) {
-  background: #f5f5f5;
+  background: rgba(79, 172, 254, 0.15);
+  border-color: #4facfe;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
 }
 
 .btn:disabled {
-  background: #cccccc;
-  border-color: #cccccc;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
 }
 
-.chapter-read-container.night-mode .btn {
-  background: #444444;
-  color: #ffffff;
-  border-color: #444444;
-}
-
-.chapter-read-container.night-mode .btn:hover:not(:disabled) {
-  background: #555555;
-}
-
 .fullscreen-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
 }
 
 .fullscreen-btn:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
 }
 
 .loading-container,
@@ -507,8 +496,8 @@ onUnmounted(() => {
 .loading-spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border: 4px solid rgba(255, 255, 255, 0.08);
+  border-top: 4px solid #4facfe;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -520,12 +509,12 @@ onUnmounted(() => {
 }
 
 .loading-container p {
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
   font-size: 1.1rem;
 }
 
 .error-message {
-  color: #f44336;
+  color: #ff6b81;
   font-size: 1.2rem;
   margin-bottom: 1rem;
   white-space: pre-line;
@@ -533,18 +522,19 @@ onUnmounted(() => {
 
 .btn-retry {
   padding: 0.8rem 2rem;
-  background: #ffffff;
-  color: #333333;
-  border: 2px solid #ffffff;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border: none;
   border-radius: 6px;
   font-size: 1rem;
   cursor: pointer;
+  font-weight: 600;
   transition: all 0.3s;
 }
 
 .btn-retry:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
 }
 
 .reader-content {
@@ -558,7 +548,7 @@ onUnmounted(() => {
 .chapter-body {
   padding: 2rem 8%;
   border-radius: 0;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
   transition: all 0.3s;
   flex: 1;
@@ -577,6 +567,7 @@ onUnmounted(() => {
   margin: 0 0 2rem 0;
   font-size: 1.8rem;
   font-weight: bold;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .chapter-read-container.night-mode .chapter-title {
@@ -588,18 +579,13 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 1rem 0;
   margin-bottom: 2rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 0.9rem;
-  color: #666;
-}
-
-.novel-name {
-  color: #667eea;
-  font-weight: 500;
+  color: rgba(168, 216, 234, 0.5);
 }
 
 .word-count {
-  color: #999;
+  color: rgba(168, 216, 234, 0.5);
 }
 
 .content {
@@ -630,7 +616,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -638,17 +624,15 @@ onUnmounted(() => {
 }
 
 .settings-panel {
-  background-color: white;
+  background: rgba(15, 25, 35, 0.95);
+  backdrop-filter: blur(20px);
   padding: 2.5rem;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   z-index: 201;
   min-width: 350px;
   max-width: 90%;
-}
-
-.chapter-read-container.night-mode .settings-panel {
-  background-color: #333;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .settings-panel h4 {
@@ -656,11 +640,7 @@ onUnmounted(() => {
   margin-bottom: 2rem;
   text-align: center;
   font-size: 1.3rem;
-  color: #333;
-}
-
-.chapter-read-container.night-mode .settings-panel h4 {
-  color: #eee;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .setting-item {
@@ -672,12 +652,8 @@ onUnmounted(() => {
 
 .setting-item label {
   font-size: 1rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 500;
-}
-
-.chapter-read-container.night-mode .setting-item label {
-  color: #eee;
 }
 
 .font-size-controls {
@@ -689,18 +665,18 @@ onUnmounted(() => {
 .font-size-controls button {
   width: 45px;
   height: 45px;
-  border: 2px solid #667eea;
-  background-color: white;
+  border: 1px solid rgba(79, 172, 254, 0.4);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
   font-weight: bold;
-  color: #667eea;
+  color: #4facfe;
   transition: all 0.3s;
 }
 
 .font-size-controls button:hover {
-  background-color: #667eea;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
 }
 
@@ -709,13 +685,14 @@ onUnmounted(() => {
   text-align: center;
   font-size: 1.1rem;
   font-weight: bold;
-  color: #667eea;
+  color: #4facfe;
 }
 
 .night-mode-toggle {
   width: 20px;
   height: 20px;
   cursor: pointer;
+  accent-color: #4facfe;
 }
 
 .bg-color-options {
@@ -739,6 +716,7 @@ onUnmounted(() => {
   width: 100%;
   padding: 0.8rem;
   margin-top: 1rem;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {

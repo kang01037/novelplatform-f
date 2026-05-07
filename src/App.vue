@@ -1,17 +1,17 @@
 <template>
   <div class="app-container">
-    <!-- 樱花背景层 -->
-    <div class="sakura-bg">
+    <!-- 飘雪背景层 -->
+    <div class="snow-bg">
       <div
-          v-for="n in 20"
+          v-for="n in 30"
           :key="n"
-          class="sakura-petal"
-          :style="getPetalStyle(n)"
+          class="snowflake"
+          :style="getSnowflakeStyle(n)"
       ></div>
     </div>
 
     <!-- 头部导航 -->
-    <header class="app-header glass-effect" v-if="!isReaderPage && !isAdmin">
+    <header class="app-header glass-effect" v-if="!isReaderPage && !isAdmin && !isLandingPage">
       <div class="header-inner">
         <!-- Logo 区域 -->
         <div class="logo-section">
@@ -40,6 +40,14 @@
               <router-link to="/bookshelf" class="nav-item">
                 <svg-icon name="bookmark" />
                 <span>我的书架</span>
+              </router-link>
+              <router-link to="/novel/completed" class="nav-item">
+                <svg-icon name="check-circle" />
+                <span>完本精选</span>
+              </router-link>
+              <router-link to="/novel/category" class="nav-item">
+                <svg-icon name="grid" />
+                <span>分类浏览</span>
               </router-link>
             </template>
 
@@ -75,6 +83,9 @@
                 <router-link to="/user/profile" class="dropdown-item">
                   <svg-icon name="user" /> 个人中心
                 </router-link>
+                <router-link to="/user/comments" class="dropdown-item">
+                  <svg-icon name="message-square" /> 我的评论
+                </router-link>
                 <div class="dropdown-divider"></div>
                 <button @click.prevent="logout" class="dropdown-item text-red">
                   <svg-icon name="logout" /> 退出登录
@@ -96,13 +107,13 @@
     </main>
 
     <!-- 底部 -->
-    <footer class="app-footer glass-effect-dark" v-if="!isReaderPage">
+    <footer class="app-footer glass-effect-dark" v-if="!isReaderPage && !isLandingPage">
       <div class="footer-inner">
         <p class="copyright">© 2026 NovelHub. All rights reserved.</p>
         <div class="footer-actions">
           <router-link
               v-if="!isWriter"
-              to="/writer/dashboard"
+              to="/register/writer"
               class="fancy-btn writer-btn"
           >
             <span class="btn-content">
@@ -128,6 +139,7 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { authApi } from './api'
 
 const router = useRouter()
 const route = useRoute()
@@ -139,6 +151,7 @@ const showDropdown = ref(false)
 const isWriter = computed(() => userStatus.value >= 2)
 const isAdmin = computed(() => userStatus.value >= 3)
 const isReaderPage = computed(() => route.path.startsWith('/chapter/read/'))
+const isLandingPage = computed(() => route.path === '/')
 
 // 简单的 SVG 图标组件替代方案
 const svgIcon = {
@@ -163,6 +176,15 @@ const svgIcon = {
       <template v-else-if="name === 'user'">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
       </template>
+      <template v-else-if="name === 'check-circle'">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </template>
+      <template v-else-if="name === 'grid'">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </template>
+      <template v-else-if="name === 'message-square'">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </template>
       <template v-else-if="name === 'logout'">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
       </template>
@@ -178,10 +200,10 @@ const svgIcon = {
 
 // 检查登录状态
 const checkLoginStatus = () => {
-  const token = localStorage.getItem('token')
+  const accessToken = localStorage.getItem('accessToken')
   const username = localStorage.getItem('username')
   const status = parseInt(localStorage.getItem('userStatus') || '1')
-  isLoggedIn.value = !!(token || username)
+  isLoggedIn.value = !!(accessToken || username)
   userStatus.value = status
 }
 
@@ -189,8 +211,17 @@ const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
 }
 
-const logout = () => {
-  localStorage.removeItem('token')
+const logout = async () => {
+  const refreshToken = localStorage.getItem('refreshToken')
+  if (refreshToken) {
+    try {
+      await authApi.logout(refreshToken)
+    } catch (e) {
+      // 忽略服务端注销失败
+    }
+  }
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
   localStorage.removeItem('username')
   localStorage.removeItem('userId')
   localStorage.removeItem('userStatus')
@@ -201,13 +232,13 @@ const logout = () => {
   router.push('/login')
 }
 
-// 优化后的樱花样式生成
-const getPetalStyle = (n) => {
-  const left = Math.random() * 100 // 随机分布在屏幕宽度上
+// 雪花样式生成
+const getSnowflakeStyle = (n) => {
+  const left = Math.random() * 100
   const delay = Math.random() * 15
   const duration = 10 + Math.random() * 20
-  const size = 10 + Math.random() * 15
-  const sway = Math.random() * 100 - 50 // 左右摇摆幅度
+  const size = 3 + Math.random() * 10
+  const sway = Math.random() * 100 - 50
 
   return {
     left: `${left}%`,
@@ -241,12 +272,12 @@ watch(() => route.path, () => {
   flex-direction: column;
   min-height: 100vh;
   position: relative;
-  background: #f8f9fa;
+  background: linear-gradient(170deg, #0f1923 0%, #1a2a3a 30%, #1e3a4f 60%, #2a4a5f 100%);
   overflow-x: hidden;
 }
 
-/* --- 樱花背景 --- */
-.sakura-bg {
+/* --- 雪花背景 --- */
+.snow-bg {
   position: fixed;
   top: 0;
   left: 0;
@@ -257,37 +288,37 @@ watch(() => route.path, () => {
   overflow: hidden;
 }
 
-.sakura-petal {
+.snowflake {
   position: absolute;
-  top: -50px;
-  background: linear-gradient(135deg, #ffd1dc 0%, #ffb7c5 100%);
-  border-radius: 100% 0 50% 50%;
+  top: -20px;
+  background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+  border-radius: 50%;
   opacity: 0;
-  animation: fall linear infinite;
-  box-shadow: 0 0 10px rgba(255, 183, 197, 0.3);
+  animation: snowfall linear infinite;
 }
 
-@keyframes fall {
-  0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
+@keyframes snowfall {
+  0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
   10% { opacity: 0.8; }
-  90% { opacity: 0.6; }
-  100% { transform: translateY(110vh) rotate(360deg) translateX(var(--sway, 20px)); opacity: 0; }
+  90% { opacity: 0.4; }
+  100% { transform: translateY(110vh) translateX(var(--sway, 20px)) rotate(360deg); opacity: 0; }
 }
 
 /* --- 玻璃拟态效果 --- */
 .glass-effect {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
 }
 
 .glass-effect-dark {
-  background: rgba(227, 121, 237, 0.35);
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  color: white;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* --- 头部样式 --- */
@@ -312,22 +343,22 @@ watch(() => route.path, () => {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: #333;
 }
 
 .logo-icon {
   width: 32px;
   height: 32px;
-  color: #a18cd1;
+  color: #4facfe;
   margin-right: 10px;
 }
 
 .logo-text {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   -webkit-background-clip: text;
-  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -0.5px;
 }
 
@@ -350,7 +381,7 @@ watch(() => route.path, () => {
   display: flex;
   align-items: center;
   padding: 0.5rem 1rem;
-  color: #555;
+  color: rgba(168, 216, 234, 0.6);
   text-decoration: none;
   font-weight: 500;
   border-radius: 8px;
@@ -361,26 +392,26 @@ watch(() => route.path, () => {
   width: 18px;
   height: 18px;
   margin-right: 6px;
-  color: #999;
+  color: rgba(168, 216, 234, 0.4);
   transition: color 0.3s;
 }
 
 .nav-item:hover {
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.08);
+  color: #4facfe;
+  background: rgba(79, 172, 254, 0.1);
 }
 
 .nav-item:hover .icon {
-  color: #667eea;
+  color: #4facfe;
 }
 
 .nav-item.router-link-active {
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
+  color: #4facfe;
+  background: rgba(79, 172, 254, 0.12);
 }
 
 .nav-item.router-link-active .icon {
-  color: #667eea;
+  color: #4facfe;
 }
 
 /* --- 用户操作区 --- */
@@ -392,30 +423,29 @@ watch(() => route.path, () => {
 
 .btn-ghost {
   padding: 0.5rem 1.2rem;
-  color: rgba(236, 49, 255, 0.79);
+  color: #4facfe;
   text-decoration: none;
   font-weight: 600;
   border-radius: 6px;
   transition: background 0.2s;
 }
 
-.btn-ghost:hover { background: rgba(102, 126, 234, 0.1); }
+.btn-ghost:hover { background: rgba(79, 172, 254, 0.1); }
 
 .btn-primary {
   padding: 0.5rem 1.2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   text-decoration: none;
   font-weight: 600;
   border-radius: 6px;
-  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 14px rgba(79, 172, 254, 0.25);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
-  color: rgba(236, 49, 255, 0.79);
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.35);
 }
 
 /* 用户下拉菜单 */
@@ -427,13 +457,13 @@ watch(() => route.path, () => {
 .user-avatar {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, rgba(248, 82, 241, 0.72) 0%, #fbc2eb 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s;
 }
 
@@ -449,11 +479,12 @@ watch(() => route.path, () => {
   top: 50px;
   right: 0;
   width: 180px;
-  background: white;
+  background: rgba(15, 25, 35, 0.95);
+  backdrop-filter: blur(20px);
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
   padding: 8px;
-  border: 1px solid #eee;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 200;
   animation: fadeIn 0.2s ease;
 }
@@ -462,7 +493,7 @@ watch(() => route.path, () => {
   display: flex;
   align-items: center;
   padding: 10px 12px;
-  color: #333;
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -473,10 +504,10 @@ watch(() => route.path, () => {
   cursor: pointer;
 }
 
-.dropdown-item:hover { background: #f5f5f5; }
-.dropdown-item.text-red { color: #ff4757; }
-.dropdown-item .icon { width: 16px; height: 16px; margin-right: 8px; color: #888; }
-.dropdown-divider { height: 1px; background: #eee; margin: 5px 0; }
+.dropdown-item:hover { background: rgba(255, 255, 255, 0.06); }
+.dropdown-item.text-red { color: #ff6b81; }
+.dropdown-item .icon { width: 16px; height: 16px; margin-right: 8px; color: rgba(168, 216, 234, 0.4); }
+.dropdown-divider { height: 1px; background: rgba(255, 255, 255, 0.08); margin: 5px 0; }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
@@ -513,7 +544,7 @@ watch(() => route.path, () => {
 
 .copyright {
   font-size: 0.9rem;
-  opacity: 0.8;
+  opacity: 0.6;
   letter-spacing: 0.5px;
 }
 
@@ -534,26 +565,27 @@ watch(() => route.path, () => {
 }
 
 .writer-btn {
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.4);
-  color: white;
+  background: rgba(79, 172, 254, 0.1);
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  color: #4facfe;
 }
 
 .writer-btn:hover {
-  background: white;
-  color: rgba(255, 121, 208, 0.78);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+  border-color: transparent;
 }
 
 .admin-btn {
-  background: rgba(0,0,0,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: white;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .admin-btn:hover {
-  background: rgba(255,255,255,0.9);
-  color: #333;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
 }
 
 .btn-content {

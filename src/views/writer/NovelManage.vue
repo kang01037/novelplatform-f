@@ -117,12 +117,12 @@ onMounted(() => {
 .page-header h1 {
   margin: 0;
   font-size: 2rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .btn-create {
   padding: 0.8rem 2rem;
-  background: linear-gradient(135deg, #0030ff 0%, #00ebff 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   text-decoration: none;
   border-radius: 8px;
@@ -132,34 +132,35 @@ onMounted(() => {
 
 .btn-create:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 48, 255, 0.4);
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
 }
 
 .loading {
   text-align: center;
   padding: 3rem;
   font-size: 1.2rem;
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
 }
 
 .empty-state {
   text-align: center;
   padding: 5rem 2rem;
-  background: white;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .empty-state p {
   margin-bottom: 1.5rem;
   font-size: 1.2rem;
-  color: #999;
+  color: rgba(168, 216, 234, 0.6);
 }
 
 .btn-create-first {
   display: inline-block;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #59ff00 0%, #00ff29 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   text-decoration: none;
   border-radius: 8px;
@@ -169,7 +170,7 @@ onMounted(() => {
 
 .btn-create-first:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 47, 255, 0.4);
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
 }
 
 .novel-list {
@@ -182,15 +183,16 @@ onMounted(() => {
   display: flex;
   gap: 1.5rem;
   padding: 1.5rem;
-  background: white;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s;
 }
 
 .novel-item:hover {
   transform: translateX(5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .novel-cover {
@@ -199,7 +201,7 @@ onMounted(() => {
   flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
-  background: linear-gradient(135deg, #00ffd1 0%, #0049ff 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
 .novel-cover img {
@@ -228,13 +230,13 @@ onMounted(() => {
   margin: 0 0 0.5rem 0;
   font-size: 1.3rem;
   font-weight: bold;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .novel-desc {
   margin: 0 0 1rem 0;
   font-size: 0.95rem;
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -256,30 +258,30 @@ onMounted(() => {
 }
 
 .status-0 {
-  background: #e3f2fd;
-  color: #2196F3;
+  background: rgba(79, 172, 254, 0.15);
+  color: #4facfe;
 }
 
 .status-1 {
-  background: #e8f5e9;
-  color: #4CAF50;
+  background: rgba(0, 184, 148, 0.15);
+  color: #00b894;
 }
 
 .status-2 {
-  background: #fff3e0;
-  color: #ff9800;
+  background: rgba(253, 203, 110, 0.15);
+  color: #fdcb6e;
 }
 
 .update-time {
   font-size: 0.85rem;
-  color: #999;
+  color: rgba(168, 216, 234, 0.5);
 }
 
 .novel-stats {
   display: flex;
   gap: 1rem;
   font-size: 0.9rem;
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
 }
 
 .novel-actions {
@@ -301,21 +303,21 @@ onMounted(() => {
 }
 
 .btn-chapters {
-  background: linear-gradient(135deg, #48ff00 0%, #00c4ff 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
 }
 
 .btn-chapters:hover {
-  background: linear-gradient(135deg, #0081ff 0%, #009eff 100%);
+  box-shadow: 0 3px 10px rgba(79, 172, 254, 0.4);
 }
 
 .btn-detail {
-  background: #f0f0f0;
-  color: #333;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .btn-detail:hover {
-  background: #e0e0e0;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 @media (max-width: 768px) {

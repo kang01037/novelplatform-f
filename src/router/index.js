@@ -4,7 +4,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('../views/novel/NovelList.vue')
+    component: () => import('../views/PortalHome.vue')
   },
   {
     path: '/login',
@@ -17,9 +17,19 @@ const routes = [
     component: () => import('../views/user/Register.vue')
   },
   {
+    path: '/register/writer',
+    name: 'WriterRegister',
+    component: () => import('../views/user/WriterRegister.vue')
+  },
+  {
     path: '/user/profile',
     name: 'UserProfile',
     component: () => import('../views/user/UserProfile.vue')
+  },
+  {
+    path: '/user/comments',
+    name: 'UserComments',
+    component: () => import('../views/user/UserComments.vue')
   },
   {
     path: '/novel/list',
@@ -40,6 +50,16 @@ const routes = [
     path: '/novel/hot',
     name: 'NovelHot',
     component: () => import('../views/novel/NovelHot.vue')
+  },
+  {
+    path: '/novel/completed',
+    name: 'CompletedNovels',
+    component: () => import('../views/novel/CompletedNovels.vue')
+  },
+  {
+    path: '/novel/category',
+    name: 'CategoryBrowse',
+    component: () => import('../views/novel/CategoryBrowse.vue')
   },
   {
     path: '/chapter/list/:novelId',
@@ -119,10 +139,10 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
+  const accessToken = localStorage.getItem('accessToken')
   const userStatus = parseInt(localStorage.getItem('userStatus') || '1')
 
-  if (to.meta.requiresAuth && !token) {
+  if (to.meta.requiresAuth && !accessToken) {
     next('/login')
   } else if (to.meta.minRole && userStatus < to.meta.minRole) {
     next('/unauthorized')

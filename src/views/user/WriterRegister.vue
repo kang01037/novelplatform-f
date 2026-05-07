@@ -1,78 +1,82 @@
 <template>
-  <div class="register-page">
+  <div class="writer-register-page">
     <div class="snow-bg">
       <div v-for="n in 40" :key="n" class="snowflake" :style="getSnowflakeStyle(n)"></div>
     </div>
 
     <div class="register-wrapper">
       <div class="form-area">
-        <div class="form-container">
-          <div class="form-header">
-            <h2 class="form-title">创建账户</h2>
-            <p class="form-subtitle">加入冰雪书阁，开启阅读之旅</p>
+        <div class="form-header">
+          <div class="header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </div>
+          <h2 class="form-title">成为作家</h2>
+          <p class="form-subtitle">加入创作者大家庭，开启您的写作之旅</p>
+        </div>
+
+        <form @submit.prevent="handleRegister" class="register-form">
+          <div class="form-row">
+            <div class="input-group">
+              <label>用户名</label>
+              <div class="input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" v-model="form.username" placeholder="请输入用户名" required>
+              </div>
+            </div>
+            <div class="input-group">
+              <label>笔名</label>
+              <div class="input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" v-model="form.nickname" placeholder="用作作者笔名">
+              </div>
+            </div>
           </div>
 
-          <form @submit.prevent="handleRegister" class="register-form">
-            <div class="form-row">
-              <div class="input-group">
-                <label>用户名</label>
-                <div class="input-wrapper">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  <input type="text" v-model="form.username" placeholder="请输入用户名" required>
-                </div>
-              </div>
-              <div class="input-group">
-                <label>昵称</label>
-                <div class="input-wrapper">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  <input type="text" v-model="form.nickname" placeholder="请输入昵称">
-                </div>
+          <div class="form-row">
+            <div class="input-group">
+              <label>密码</label>
+              <div class="input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" v-model="form.password" placeholder="请输入密码" required>
               </div>
             </div>
-
-            <div class="form-row">
-              <div class="input-group">
-                <label>密码</label>
-                <div class="input-wrapper">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  <input type="password" v-model="form.password" placeholder="请输入密码" required>
-                </div>
-              </div>
-              <div class="input-group">
-                <label>确认密码</label>
-                <div class="input-wrapper">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  <input type="password" v-model="form.confirmPassword" placeholder="再次输入密码" required>
-                </div>
+            <div class="input-group">
+              <label>确认密码</label>
+              <div class="input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" v-model="form.confirmPassword" placeholder="再次输入密码" required>
               </div>
             </div>
-
-            <div class="form-row">
-              <div class="input-group">
-                <label>邮箱</label>
-                <div class="input-wrapper">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  <input type="email" v-model="form.email" placeholder="请输入邮箱">
-                </div>
-              </div>
-              <div class="input-group">
-                <label>手机号</label>
-                <div class="input-wrapper">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                  <input type="tel" v-model="form.phone" placeholder="请输入手机号">
-                </div>
-              </div>
-            </div>
-
-            <button type="submit" class="submit-btn" :disabled="loading">
-              {{ loading ? '注册中...' : '注册' }}
-            </button>
-          </form>
-
-          <div class="form-footer">
-            <router-link to="/login" class="login-link">已有账户？去登录</router-link>
-            <router-link to="/" class="back-link">返回首页</router-link>
           </div>
+
+          <div class="form-row">
+            <div class="input-group">
+              <label>邮箱</label>
+              <div class="input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <input type="email" v-model="form.email" placeholder="请输入邮箱">
+              </div>
+            </div>
+            <div class="input-group">
+              <label>手机号</label>
+              <div class="input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <input type="tel" v-model="form.phone" placeholder="请输入手机号">
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" :disabled="loading">
+            {{ loading ? '注册中...' : '注册成为作家' }}
+          </button>
+        </form>
+
+        <div class="form-footer">
+          <router-link to="/login?role=writer" class="login-link">已有账户？去登录</router-link>
+          <router-link to="/" class="back-link">返回首页</router-link>
         </div>
       </div>
     </div>
@@ -115,12 +119,13 @@ const handleRegister = async () => {
       phone: form.value.phone || null,
       nickname: form.value.nickname || null,
       gender: form.value.gender,
-      birthday: form.value.birthday || null
+      birthday: form.value.birthday || null,
+      userStatus: 2
     }
     const response = await userApi.register(registerData)
     if (response.data.code === 200 || response.data.message === 'success') {
-      alert('注册成功，请登录')
-      router.push('/login')
+      alert('作家注册成功，请登录')
+      router.push('/login?role=writer')
     } else {
       alert(response.data.message || '注册失败')
     }
@@ -128,8 +133,8 @@ const handleRegister = async () => {
     if (error.response) {
       const { code, message } = error.response.data
       if (code === 200 && message === 'success') {
-        alert('注册成功，请登录')
-        router.push('/login')
+        alert('作家注册成功，请登录')
+        router.push('/login?role=writer')
         return
       }
       alert(`注册失败：${message || '服务器错误'}`)
@@ -159,9 +164,9 @@ const getSnowflakeStyle = (n) => {
 </script>
 
 <style scoped>
-.register-page {
+.writer-register-page {
   min-height: 100vh;
-  background: linear-gradient(170deg, #0f1923 0%, #1a2a3a 30%, #1e3a4f 60%, #2a4a5f 100%);
+  background: linear-gradient(170deg, #0f1923 0%, #1a2a3a 30%, #2a1a3a 60%, #3a1a4f 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -205,7 +210,7 @@ const getSnowflakeStyle = (n) => {
   background: rgba(15,25,35,0.9);
   backdrop-filter: blur(20px);
   border-radius: 28px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(161,140,209,0.15);
   box-shadow: 0 30px 80px rgba(0,0,0,0.4);
   padding: 3rem;
 }
@@ -213,6 +218,23 @@ const getSnowflakeStyle = (n) => {
 .form-header {
   text-align: center;
   margin-bottom: 2.5rem;
+}
+
+.header-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: rgba(161,140,209,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.2rem;
+}
+
+.header-icon svg {
+  width: 32px;
+  height: 32px;
+  color: #a18cd1;
 }
 
 .form-title {
@@ -278,9 +300,9 @@ const getSnowflakeStyle = (n) => {
 
 .input-wrapper input:focus {
   outline: none;
-  border-color: rgba(79,172,254,0.5);
+  border-color: rgba(161,140,209,0.5);
   background: rgba(255,255,255,0.08);
-  box-shadow: 0 0 0 3px rgba(79,172,254,0.1);
+  box-shadow: 0 0 0 3px rgba(161,140,209,0.1);
 }
 
 .submit-btn {
@@ -290,8 +312,8 @@ const getSnowflakeStyle = (n) => {
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  box-shadow: 0 4px 15px rgba(79,172,254,0.3);
+  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  box-shadow: 0 4px 15px rgba(161,140,209,0.3);
   cursor: pointer;
   transition: all 0.3s;
   margin-top: 0.5rem;
@@ -299,7 +321,7 @@ const getSnowflakeStyle = (n) => {
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(79,172,254,0.4);
+  box-shadow: 0 8px 25px rgba(161,140,209,0.4);
 }
 
 .submit-btn:disabled {
@@ -320,7 +342,7 @@ const getSnowflakeStyle = (n) => {
   transition: color 0.3s;
 }
 
-.form-footer a:hover { color: #4facfe; }
+.form-footer a:hover { color: #a18cd1; }
 
 @media (max-width: 600px) {
   .form-row { grid-template-columns: 1fr; }

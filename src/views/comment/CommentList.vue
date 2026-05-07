@@ -31,7 +31,7 @@
             rows="4"
             :disabled="submitting"
         ></textarea>
-        <button class="btn btn-primary" @click="submitComment" :disabled="submitting || !newComment.content.trim()">
+        <button class="btn btn-primary" @click="debouncedSubmit" :disabled="submitting || !newComment.content.trim()">
           {{ submitting ? '提交中...' : '发表评论' }}
         </button>
       </div>
@@ -52,8 +52,7 @@
           </div>
           <div class="comment-content">{{ comment.content }}</div>
           <div class="comment-footer">
-            <button class="btn-action" @click="likeComment(comment.commentId)" :disabled="liking">
-              点赞 {{ comment.likeCount || 0 }}
+            <button class="btn-action" @click="throttledLike(comment.commentId)" :disabled="liking">
             </button>
             <button class="btn-action" @click="showReplyForm(comment.commentId)">
               回复 ({{ comment.replyCount || 0 }})
@@ -69,7 +68,7 @@
                 :disabled="submitting"
             ></textarea>
             <div class="reply-actions">
-              <button class="btn-sm btn-primary" @click="submitReply(comment.commentId)" :disabled="submitting || !replyContent.trim()">
+              <button class="btn-sm btn-primary" @click="debouncedReply(comment.commentId)" :disabled="submitting || !replyContent.trim()">
                 {{ submitting ? '提交中...' : '提交回复' }}
               </button>
               <button class="btn-sm btn-cancel" @click="cancelReply">取消</button>
@@ -93,7 +92,7 @@
               </div>
               <div class="reply-content">{{ reply.content }}</div>
               <div class="reply-footer">
-                <button class="btn-action" @click="likeComment(reply.commentId)" :disabled="liking">
+                <button class="btn-action" @click="throttledLike(reply.commentId)" :disabled="liking">
                   👍 {{ reply.likeCount || 0 }}
                 </button>
               </div>
@@ -109,6 +108,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { commentApi, userApi } from '../../api'
+import { debounce, throttle } from '../../utils'
 
 const route = useRoute()
 const novelId = route.params.novelId
@@ -319,6 +319,16 @@ const submitReply = async (parentId) => {
   }
 }
 
+// 防抖包装：提交评论
+const debouncedSubmit = debounce(() => {
+  submitComment()
+}, 300)
+
+// 防抖包装：提交回复
+const debouncedReply = debounce((parentId) => {
+  submitReply(parentId)
+}, 300)
+
 const likeComment = async (commentId) => {
   if (liking.value) return
 
@@ -381,6 +391,11 @@ const likeComment = async (commentId) => {
   }
 }
 
+// 节流包装：点赞
+const throttledLike = throttle((commentId) => {
+  likeComment(commentId)
+}, 500, { leading: true, trailing: false })
+
 const showReplyForm = (commentId) => {
   replyCommentId.value = commentId
   replyContent.value = ''
@@ -408,7 +423,7 @@ onMounted(() => {
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #f8f9fa;
+  background: transparent;
   min-height: 100vh;
 }
 
@@ -418,7 +433,7 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .header-left {
@@ -429,10 +444,10 @@ onMounted(() => {
 
 .btn-back {
   padding: 0.6rem 1.2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.3s;
@@ -441,22 +456,13 @@ onMounted(() => {
 
 .btn-back:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
 }
 
 .page-header h2 {
   margin: 0;
   font-size: 1.8rem;
-  color: #333;
-}
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 2px solid #f5f5f5;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .user-info {
@@ -471,8 +477,8 @@ onMounted(() => {
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .user-avatar img {
@@ -492,7 +498,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   font-weight: bold;
   font-size: 1.2rem;
@@ -508,27 +514,9 @@ onMounted(() => {
   gap: 0.2rem;
 }
 
-.comment-user {
-  color: #667eea;
-  font-weight: 700;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.reply-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.8rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid #f5f5f5;
-}
-
 .comment-count {
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border-radius: 20px;
   font-size: 0.9rem;
@@ -549,8 +537,8 @@ onMounted(() => {
 .loading-spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border: 4px solid rgba(255, 255, 255, 0.08);
+  border-top: 4px solid #4facfe;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -562,93 +550,103 @@ onMounted(() => {
 }
 
 .loading-container p {
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
   font-size: 1.1rem;
 }
 
 .error-message {
-  color: #f44336;
+  color: #ff6b81;
   font-size: 1.2rem;
   margin-bottom: 1rem;
   white-space: pre-line;
 }
 
 .empty-message {
-  color: #999;
+  color: rgba(168, 216, 234, 0.5);
   font-size: 1.2rem;
 }
 
 .btn-retry {
   padding: 0.8rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s;
   margin-top: 1rem;
+  font-weight: 600;
 }
 
 .btn-retry:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
 }
 
 .comment-form {
   margin-bottom: 2rem;
   padding: 2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .comment-form h3 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   font-size: 1.3rem;
 }
 
 .comment-form textarea {
   width: 100%;
   padding: 1rem;
-  border: 2px solid #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   font-size: 1rem;
   resize: vertical;
   margin-bottom: 1rem;
   transition: border-color 0.3s;
   font-family: inherit;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .comment-form textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: rgba(79, 172, 254, 0.5);
+}
+
+.comment-form textarea::placeholder {
+  color: rgba(168, 216, 234, 0.3);
 }
 
 .comment-form textarea:disabled {
-  background-color: #f5f5f5;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .btn {
   padding: 0.8rem 2rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s;
+  font-weight: 600;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
 }
 
 .btn-primary:disabled {
@@ -657,24 +655,26 @@ onMounted(() => {
 }
 
 .btn-cancel {
-  background-color: #9e9e9e;
-  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .btn-cancel:hover {
-  background-color: #757575;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .comments {
-  background: white;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .comment-item {
   padding: 1.5rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   transition: background-color 0.3s;
 }
 
@@ -683,29 +683,35 @@ onMounted(() => {
 }
 
 .comment-item:hover {
-  background-color: #f8f9fa;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .comment-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.8rem;
-  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .comment-user {
-  color: #667eea;
-  font-weight: 500;
+  color: #4facfe;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .comment-time {
-  color: #999;
+  color: rgba(168, 216, 234, 0.4);
+  font-size: 0.85rem;
 }
 
 .comment-content {
   margin-bottom: 1rem;
   line-height: 1.6;
-  color: #333;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 1rem;
   white-space: pre-wrap;
 }
@@ -714,22 +720,23 @@ onMounted(() => {
 .reply-footer {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .btn-action {
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
-  background-color: #f0f0f0;
-  color: #666;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(168, 216, 234, 0.6);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .btn-action:hover:not(:disabled) {
-  background-color: #e0e0e0;
+  background: rgba(79, 172, 254, 0.15);
+  color: #4facfe;
   transform: translateY(-1px);
 }
 
@@ -741,24 +748,30 @@ onMounted(() => {
 .reply-form {
   margin-top: 1rem;
   padding: 1rem;
-  background-color: #f8f9fa;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 8px;
 }
 
 .reply-form textarea {
   width: 100%;
   padding: 0.8rem;
-  border: 2px solid #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   font-size: 0.9rem;
   resize: vertical;
   margin-bottom: 0.8rem;
   font-family: inherit;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .reply-form textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: rgba(79, 172, 254, 0.5);
+}
+
+.reply-form textarea::placeholder {
+  color: rgba(168, 216, 234, 0.3);
 }
 
 .reply-actions {
@@ -770,19 +783,23 @@ onMounted(() => {
 .btn-sm {
   padding: 0.5rem 1rem;
   font-size: 0.85rem;
-  border-radius: 4px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
 }
 
 .replies {
   margin-top: 1rem;
   padding-left: 2rem;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #4facfe;
 }
 
 .reply-item {
   padding: 1rem;
   margin-bottom: 1rem;
-  background-color: #f8f9fa;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 8px;
   transition: background-color 0.3s;
 }
@@ -792,29 +809,30 @@ onMounted(() => {
 }
 
 .reply-item:hover {
-  background-color: #f0f0f0;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .reply-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
-  font-size: 0.85rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .reply-user {
-  color: #667eea;
+  color: #4facfe;
   font-weight: 500;
 }
 
 .reply-time {
-  color: #999;
+  color: rgba(168, 216, 234, 0.4);
 }
 
 .reply-content {
   margin-bottom: 0.5rem;
   line-height: 1.5;
-  color: #333;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
   white-space: pre-wrap;
 }

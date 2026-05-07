@@ -123,17 +123,22 @@ onMounted(() => {
 .bookshelf-container {
   max-width: 800px;
   margin: 0 auto;
+  background: transparent;
 }
 
-h2 {
+.bookshelf-container h2 {
   text-align: center;
   margin-bottom: 2rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.8rem;
 }
 
 .bookshelf-list {
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
 }
 
 .bookshelf-item {
@@ -141,7 +146,7 @@ h2 {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.3s;
   gap: 1.5rem;
 }
@@ -151,7 +156,7 @@ h2 {
 }
 
 .bookshelf-item:hover {
-  background-color: #f9f9f9;
+  background: rgba(255, 255, 255, 0.06);
   transform: translateX(5px);
 }
 
@@ -165,10 +170,10 @@ h2 {
 .book-cover {
   width: 80px;
   height: 100px;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .book-cover img {
@@ -183,7 +188,7 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   font-size: 2.5rem;
   font-weight: bold;
@@ -192,36 +197,18 @@ h2 {
 .book-info h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.2rem;
-  color: #333;
-}
-
-
-.bookshelf-item:last-child {
-  border-bottom: none;
-}
-
-.bookshelf-item:hover {
-  background-color: #f9f9f9;
-}
-
-.book-info {
-  flex: 1;
-}
-
-.book-info h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .book-info a {
   text-decoration: none;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .last-read {
   margin: 0;
   font-size: 0.9rem;
-  color: #999;
+  color: rgba(168, 216, 234, 0.5);
 }
 
 .book-actions {
@@ -231,33 +218,38 @@ h2 {
 
 .btn {
   padding: 0.5rem 1rem;
-  background-color: #333;
-  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
+  font-size: 0.9rem;
 }
 
 .btn:hover {
-  background-color: #555;
+  background: rgba(79, 172, 254, 0.2);
+  color: #4facfe;
 }
 
 .btn-danger {
-  background-color: #dc3545;
+  background: rgba(255, 107, 129, 0.15);
+  color: #ff6b81;
 }
 
 .btn-danger:hover {
-  background-color: #c82333;
+  background: rgba(255, 107, 129, 0.3);
 }
 
 .empty {
   text-align: center;
   padding: 4rem;
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
   font-size: 1.2rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   margin-top: 2rem;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
 }
 </style>

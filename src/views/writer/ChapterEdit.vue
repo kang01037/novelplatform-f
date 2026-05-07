@@ -314,14 +314,14 @@ onMounted(async () => {
   display: inline-block;
   margin: 0.5rem 0 0 0;
   font-size: 1.5rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .btn-back {
   padding: 0.6rem 1.2rem;
-  background: #f0f0f0;
-  color: #333;
-  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(168, 216, 234, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   cursor: pointer;
   font-size: 1rem;
@@ -330,7 +330,9 @@ onMounted(async () => {
 }
 
 .btn-back:hover {
-  background: #e0e0e0;
+  background: rgba(79, 172, 254, 0.15);
+  color: #4facfe;
+  border-color: rgba(79, 172, 254, 0.3);
 }
 
 .header-actions {
@@ -350,21 +352,25 @@ onMounted(async () => {
 }
 
 .btn-save {
-  color: #000000;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
 }
 
 .btn-save:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(255, 254, 254, 0.4);
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
 }
 
 .btn-publish {
-  color: #000000;
+  background: linear-gradient(135deg, #00b894 0%, #00e676 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
 }
 
 .btn-publish:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
 }
 
 .btn-save:disabled,
@@ -374,10 +380,11 @@ onMounted(async () => {
 }
 
 .edit-form {
-  background: white;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .form-group {
@@ -388,63 +395,76 @@ onMounted(async () => {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #555;
+  color: rgba(168, 216, 234, 0.7);
 }
 
 .form-group input {
   width: 100%;
   padding: 0.8rem;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   font-size: 1.1rem;
   transition: border-color 0.3s;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.form-group input::placeholder {
+  color: rgba(168, 216, 234, 0.4);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #4facfe;
 }
 
 .content-editor {
   width: 100%;
   padding: 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
   line-height: 1.8;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.content-editor::placeholder {
+  color: rgba(168, 216, 234, 0.4);
 }
 
 .content-editor:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #4facfe;
 }
 
 .word-count {
   text-align: right;
-  color: #666;
+  color: rgba(168, 216, 234, 0.5);
   margin-top: 0.5rem;
   font-size: 0.9rem;
 }
 
 .form-tips {
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.04);
   padding: 1.5rem;
   border-radius: 8px;
   margin-top: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .form-tips h4 {
   margin: 0 0 1rem 0;
-  color: #667eea;
+  color: #4facfe;
   font-size: 1rem;
 }
 
 .form-tips ul {
   margin: 0;
   padding-left: 1.5rem;
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
   line-height: 2;
 }
 

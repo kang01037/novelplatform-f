@@ -5,26 +5,86 @@ const api = axios.create({
   timeout: 10000
 })
 
-// 添加请求拦截器
+// ---- 双 Token 刷新逻辑 ----
+let isRefreshing = false
+let pendingRequests = []
+
+// 请求拦截器：自动注入 accessToken
 api.interceptors.request.use(config => {
-  console.log('API 请求:', config.method.toUpperCase(), config.url)
+  const accessToken = localStorage.getItem('accessToken')
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`
+  }
   return config
-}, error => {
-  console.error('请求错误:', error)
-  return Promise.reject(error)
-})
+}, error => Promise.reject(error))
 
-// 添加响应拦截器
-api.interceptors.response.use(response => {
-  console.log('API 响应:', response.config.url, response.status)
-  return response
-}, error => {
-  console.error('响应错误:', error.message, error.response?.status)
-  return Promise.reject(error)
-})
+// 响应拦截器：401 时静默刷新 token
+api.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config
 
+    // 仅对 401 且非刷新请求本身做自动续签
+    if (error.response?.status === 401
+      && !originalRequest._retry
+      && !originalRequest.url?.includes('/auth/refresh')) {
 
-// 用户模块
+      if (isRefreshing) {
+        // 正在刷新中，排队等待
+        return new Promise((resolve, reject) => {
+          pendingRequests.push({ resolve, reject })
+        })
+      }
+
+      originalRequest._retry = true
+      isRefreshing = true
+
+      try {
+        const refreshToken = localStorage.getItem('refreshToken')
+        if (!refreshToken) throw new Error('No refresh token')
+
+        const res = await axios.post('/api/auth/refresh', { refreshToken })
+        const { accessToken, refreshToken: newRefreshToken } = res.data.data
+
+        localStorage.setItem('accessToken', accessToken)
+        if (newRefreshToken) {
+          localStorage.setItem('refreshToken', newRefreshToken)
+        }
+
+        // 重放排队的请求
+        pendingRequests.forEach(p => p.resolve())
+        pendingRequests = []
+
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`
+        return api(originalRequest)
+      } catch (e) {
+        pendingRequests.forEach(p => p.reject(e))
+        pendingRequests = []
+        // 刷新失败，清除登录态
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('username')
+        localStorage.removeItem('userId')
+        localStorage.removeItem('userStatus')
+        localStorage.removeItem('userInfo')
+        window.location.href = '/login'
+        return Promise.reject(e)
+      } finally {
+        isRefreshing = false
+      }
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+// ---- 认证模块 ----
+export const authApi = {
+  refresh: (refreshToken) => axios.post('/api/auth/refresh', { refreshToken }),
+  logout: (refreshToken) => axios.post('/api/auth/logout', { refreshToken })
+}
+
+// ---- 用户模块 ----
 export const userApi = {
   getUser: (userId) => api.get(`/user/${userId}`),
   getUserByUsername: (username) => api.get(`/user/username/${username}`),
@@ -34,15 +94,12 @@ export const userApi = {
   deleteUser: (userId) => api.delete(`/user/delete/${userId}`),
   login: (data) => api.post('/user/login', data),
   uploadAvatar: (formData) => api.post('/user/upload/avatar', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+    headers: { 'Content-Type': 'multipart/form-data' }
   }),
   deleteAvatar: (userId) => api.delete(`/user/avatar/${userId}`)
-
 }
 
-// 小说模块
+// ---- 小说模块 ----
 export const novelApi = {
   getNovel: (novelId) => api.get(`/novel/${novelId}`),
   getNovels: () => api.get('/novel/list'),
@@ -59,13 +116,11 @@ export const novelApi = {
   getLatestNovels: (limit = 10) => api.get(`/novel/latest?limit=${limit}`),
   searchNovels: (novelName) => api.get(`/novel/search?novelName=${novelName}`),
   uploadCover: (formData) => api.post('/novel/upload/cover', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+    headers: { 'Content-Type': 'multipart/form-data' }
   })
 }
 
-// 章节模块
+// ---- 章节模块 ----
 export const chapterApi = {
   getChapter: (chapterId) => api.get(`/chapter/${chapterId}`),
   getChaptersByNovel: (novelId) => api.get(`/chapter/novel/${novelId}`),
@@ -78,7 +133,7 @@ export const chapterApi = {
   batchDeleteChapters: (ids) => api.delete('/chapter/delete/batch', { data: ids })
 }
 
-// 书架模块
+// ---- 书架模块 ----
 export const bookshelfApi = {
   getBookshelf: (id) => api.get(`/bookshelf/${id}`),
   getBookshelfByUser: (userId) => api.get(`/bookshelf/user/${userId}`),
@@ -91,7 +146,7 @@ export const bookshelfApi = {
   updateReadingProgress: (data) => api.put('/bookshelf/reading-progress', data)
 }
 
-// 评论模块
+// ---- 评论模块 ----
 export const commentApi = {
   getComment: (commentId) => api.get(`/comment/${commentId}`),
   getCommentsByNovel: (novelId, page = 1, size = 20) => api.get(`/comment/novel/${novelId}?page=${page}&size=${size}`),
@@ -106,7 +161,7 @@ export const commentApi = {
   batchDeleteComments: (ids) => api.delete('/comment/delete/batch', { data: ids }),
   likeComment: (commentId) => api.post(`/comment/${commentId}/like`),
   unlikeComment: (commentId) => api.post(`/comment/${commentId}/unlike`),
-  getAllComments: () => api.get('/comment/all'),
+  getAllComments: (page = 1, size = 20) => api.get(`/comment/all?page=${page}&size=${size}`),
 }
 
 export default api

@@ -330,7 +330,7 @@ onMounted(() => {
 .page-title {
   font-size: 2rem;
   font-weight: 800;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   display: inline-flex;
   align-items: center;
   gap: 0.8rem;
@@ -340,30 +340,31 @@ onMounted(() => {
 .title-icon {
   width: 32px;
   height: 32px;
-  color: #667eea;
+  color: #4facfe;
 }
 
 .search-input-wrapper {
   display: flex;
   align-items: center;
-  background: white;
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 50px;
   padding: 0.4rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   border: 2px solid transparent;
   transition: all 0.3s;
+  backdrop-filter: blur(20px);
 }
 
 .search-input-wrapper:focus-within {
-  border-color: #667eea;
-  box-shadow: 0 4px 25px rgba(102, 126, 234, 0.2);
+  border-color: #4facfe;
+  box-shadow: 0 4px 25px rgba(79, 172, 254, 0.2);
 }
 
 .search-icon {
   width: 22px;
   height: 22px;
   margin-left: 1.2rem;
-  color: #999;
+  color: rgba(168, 216, 234, 0.5);
 }
 
 .search-input {
@@ -372,7 +373,11 @@ onMounted(() => {
   background: transparent;
   padding: 0.8rem 1rem;
   font-size: 1rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.search-input::placeholder {
+  color: rgba(168, 216, 234, 0.4);
 }
 
 .search-input:focus {
@@ -383,7 +388,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
   padding: 0.7rem 1.8rem;
@@ -395,7 +400,7 @@ onMounted(() => {
 
 .search-btn:hover:not(:disabled) {
   transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
 }
 
 .search-btn:disabled {
@@ -421,28 +426,32 @@ onMounted(() => {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #667eea;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-top: 3px solid #4facfe;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
 
+.state-container p {
+  color: rgba(168, 216, 234, 0.6);
+}
+
 .error-icon-box svg, .empty-state svg {
   width: 60px;
   height: 60px;
-  color: #ddd;
+  color: rgba(255, 255, 255, 0.15);
   margin-bottom: 1rem;
 }
 
 .error-text {
-  color: #ff4757;
+  color: #ff6b81;
   margin-bottom: 1.5rem;
   max-width: 400px;
 }
 
 .retry-btn {
-  background: #667eea;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
   padding: 0.6rem 2rem;
@@ -452,17 +461,19 @@ onMounted(() => {
 }
 
 .hint {
-  color: #999;
+  color: rgba(168, 216, 234, 0.4);
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
 
 /* --- 结果区域 --- */
 .results-container {
-  background: white;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
   border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .results-header {
@@ -471,12 +482,12 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .results-count {
   font-size: 0.95rem;
-  color: #666;
+  color: rgba(168, 216, 234, 0.7);
   font-weight: 500;
 }
 
@@ -488,29 +499,29 @@ onMounted(() => {
 
 .sort-options .label {
   font-size: 0.9rem;
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
 }
 
 .sort-btn {
   padding: 0.4rem 1rem;
   border-radius: 20px;
-  border: 1px solid #ddd;
-  background: white;
-  color: #666;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(168, 216, 234, 0.7);
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .sort-btn:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: #4facfe;
+  color: #4facfe;
 }
 
 .sort-btn.active {
-  background: #667eea;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
-  border-color: #667eea;
+  border-color: transparent;
 }
 
 /* --- 结果列表 --- */
@@ -521,15 +532,16 @@ onMounted(() => {
 }
 
 .result-item {
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
   padding: 1.2rem;
   transition: all 0.3s;
+  border: 1px solid transparent;
 }
 
 .result-item:hover {
-  background: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(79, 172, 254, 0.2);
   transform: translateX(5px);
 }
 
@@ -547,7 +559,7 @@ onMounted(() => {
   height: 110px;
   border-radius: 8px;
   overflow: hidden;
-  background: #f0f2f5;
+  background: rgba(255, 255, 255, 0.05);
   flex-shrink: 0;
 }
 
@@ -563,7 +575,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   font-size: 2rem;
   font-weight: bold;
@@ -581,7 +593,7 @@ onMounted(() => {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.status-0 { background: #667eea; }
+.status-0 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 .status-1 { background: #00b894; }
 .status-2 { background: #fdcb6e; color: #333; }
 
@@ -593,7 +605,7 @@ onMounted(() => {
 .item-title {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   margin: 0 0 0.5rem;
   white-space: nowrap;
   overflow: hidden;
@@ -601,13 +613,13 @@ onMounted(() => {
 }
 
 .item-title .highlight-match {
-  color: #ff4757;
+  color: #4facfe;
   font-weight: 700;
 }
 
 .item-desc {
   font-size: 0.85rem;
-  color: #888;
+  color: rgba(168, 216, 234, 0.6);
   line-height: 1.5;
   height: 2.55em;
   overflow: hidden;
@@ -622,16 +634,17 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8rem;
-  color: #666;
+  color: rgba(168, 216, 234, 0.6);
 }
 
 .item-meta svg {
   width: 14px;
   height: 14px;
+  stroke: rgba(168, 216, 234, 0.4);
 }
 
 .divider {
-  color: #ccc;
+  color: rgba(255, 255, 255, 0.15);
 }
 
 /* --- 统计数据 --- */
@@ -652,30 +665,32 @@ onMounted(() => {
 .stat-item svg {
   width: 16px;
   height: 16px;
-  color: #999;
+  stroke: rgba(168, 216, 234, 0.4);
 }
 
 .stat-item.highlight svg {
+  stroke: none;
+  fill: #f1c40f;
   color: #f1c40f;
 }
 
 .stat-item span {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #666;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* --- 箭头 --- */
 .arrow-icon {
   width: 24px;
   height: 24px;
-  color: #ccc;
+  stroke: rgba(255, 255, 255, 0.2);
   flex-shrink: 0;
   transition: all 0.3s;
 }
 
 .result-item:hover .arrow-icon {
-  color: #667eea;
+  stroke: #4facfe;
   transform: translateX(5px);
 }
 

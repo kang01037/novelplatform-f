@@ -256,7 +256,6 @@ const goBack = () => {
 /* --- 页面布局 --- */
 .create-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #f9f4ff 50%, #fff5f8 100%);
   padding: 2rem 1rem;
 }
 
@@ -280,21 +279,20 @@ const goBack = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255,255,255,0.6);
-  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0.6rem 1.2rem;
   border-radius: 30px;
-  color: #666;
+  color: rgba(168, 216, 234, 0.7);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 
 .back-btn:hover {
-  background: white;
-  color: #667eea;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+  background: rgba(79, 172, 254, 0.15);
+  color: #4facfe;
+  border-color: rgba(79, 172, 254, 0.3);
 }
 
 .back-btn svg {
@@ -305,23 +303,23 @@ const goBack = () => {
 .header-title h1 {
   margin: 0;
   font-size: 1.8rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 700;
 }
 
 .header-title p {
   margin: 0.3rem 0 0;
-  color: #888;
+  color: rgba(168, 216, 234, 0.6);
   font-size: 0.9rem;
 }
 
 /* --- 玻璃卡片 --- */
 .glass-card {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   overflow: hidden;
 }
 
@@ -344,7 +342,7 @@ const goBack = () => {
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  background: #f0f2f5;
+  background: rgba(255, 255, 255, 0.05);
   border: 2px dashed transparent;
   transition: all 0.3s;
 }
@@ -357,22 +355,22 @@ const goBack = () => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #999;
-  border: 2px dashed rgba(0,0,0,0.1);
+  color: rgba(168, 216, 234, 0.5);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   transition: all 0.3s;
 }
 
 .upload-placeholder:hover {
-  border-color: #a18cd1;
-  background: rgba(161, 140, 209, 0.03);
+  border-color: #4facfe;
+  background: rgba(79, 172, 254, 0.05);
 }
 
 .icon-box {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.03);
+  background: rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -382,11 +380,11 @@ const goBack = () => {
 .icon-box svg {
   width: 24px;
   height: 24px;
-  color: #aaa;
+  stroke: rgba(168, 216, 234, 0.4);
 }
 
-.text-main { font-weight: 600; color: #555; margin-bottom: 0.3rem; }
-.text-sub { font-size: 0.8rem; color: #aaa; }
+.text-main { font-weight: 600; color: rgba(168, 216, 234, 0.7); margin-bottom: 0.3rem; }
+.text-sub { font-size: 0.8rem; color: rgba(168, 216, 234, 0.4); }
 
 .preview-img {
   width: 100%;
@@ -426,8 +424,8 @@ const goBack = () => {
 }
 
 .action-btn svg { width: 14px; height: 14px; }
-.action-btn.change { background: white; color: #333; }
-.action-btn.delete { background: rgba(255,255,255,0.2); color: white; }
+.action-btn.change { background: rgba(255, 255, 255, 0.9); color: #333; }
+.action-btn.delete { background: rgba(255, 255, 255, 0.2); color: white; }
 .action-btn:hover { transform: scale(1.05); }
 
 .loading-tip {
@@ -436,7 +434,7 @@ const goBack = () => {
   justify-content: center;
   gap: 0.5rem;
   margin-top: 1rem;
-  color: #667eea;
+  color: #4facfe;
   font-size: 0.9rem;
 }
 
@@ -451,30 +449,35 @@ const goBack = () => {
   display: block;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #444;
+  color: rgba(168, 216, 234, 0.7);
   margin-bottom: 0.6rem;
 }
 
-.required { color: #ff4757; margin-left: 2px; }
+.required { color: #ff6b81; margin-left: 2px; }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
   padding: 0.9rem 1.2rem;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  background: rgba(255,255,255,0.6);
+  background: rgba(255, 255, 255, 0.06);
   font-size: 0.95rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   transition: all 0.3s;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(168, 216, 234, 0.4);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #a18cd1;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(161, 140, 209, 0.1);
+  border-color: #4facfe;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
 }
 
 .form-group textarea {
@@ -495,13 +498,18 @@ const goBack = () => {
 .select-wrapper select {
   width: 100%;
   padding: 0.9rem 1.2rem;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  background: rgba(255,255,255,0.6);
+  background: rgba(255, 255, 255, 0.06);
   font-size: 0.95rem;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   appearance: none;
   cursor: pointer;
+}
+
+.select-wrapper select option {
+  background: #1a2a3a;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .select-wrapper .arrow {
@@ -511,7 +519,7 @@ const goBack = () => {
   transform: translateY(-50%);
   width: 16px;
   height: 16px;
-  color: #999;
+  stroke: rgba(168, 216, 234, 0.4);
   pointer-events: none;
 }
 
@@ -527,7 +535,7 @@ const goBack = () => {
   justify-content: center;
   min-width: 160px;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
   border-radius: 30px;
@@ -535,12 +543,12 @@ const goBack = () => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
 }
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
 }
 
 .submit-btn:disabled {
@@ -563,9 +571,9 @@ const goBack = () => {
   width: 16px;
   height: 16px;
   border-width: 2px;
-  border-top-color: #667eea;
-  border-left-color: #667eea;
-  border-bottom-color: #667eea;
+  border-top-color: #4facfe;
+  border: 2px solid rgba(79, 172, 254, 0.2);
+  border-top-color: #4facfe;
 }
 
 .spinner.btn-spinner {

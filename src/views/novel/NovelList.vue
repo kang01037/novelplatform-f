@@ -1,6 +1,5 @@
 <template>
   <div class="novel-list-page">
-    <!-- 顶部区域 -->
     <header class="page-header">
       <div class="header-content">
         <h2 class="title">
@@ -8,36 +7,12 @@
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
           </svg>
-          书库探索
+          书库
         </h2>
         <p class="subtitle">发现精彩故事，开启阅读之旅</p>
       </div>
 
-      <!-- 工具栏 -->
-      <div class="toolbar glass-card">
-        <div class="filter-group">
-          <div class="select-wrapper">
-            <select v-model="statusFilter" @change="handleFilter">
-              <option value="">全部状态</option>
-              <option value="0">连载中</option>
-              <option value="1">已完结</option>
-              <option value="2">暂停更新</option>
-            </select>
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </div>
-
-          <div class="select-wrapper">
-            <select v-model="sortBy" @change="handleSort">
-              <option value="default">默认排序</option>
-              <option value="click">点击量</option>
-              <option value="collect">收藏数</option>
-              <option value="score">评分</option>
-              <option value="update">更新时间</option>
-            </select>
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </div>
-        </div>
-
+      <div class="toolbar">
         <div class="search-box">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
@@ -49,22 +24,17 @@
               placeholder="搜索小说名、作者..."
               @keyup.enter="handleSearch"
           >
-          <button @click="handleSearch" :disabled="!searchKeyword.trim()" class="search-btn">
-            搜索
-          </button>
+          <button @click="handleSearch" :disabled="!searchKeyword.trim()" class="search-btn">搜索</button>
         </div>
       </div>
     </header>
 
-    <!-- 内容区域 -->
     <main class="content-area">
-      <!-- 加载状态 -->
       <div v-if="loading" class="state-container loading-state">
         <div class="spinner"></div>
         <p>正在加载书库...</p>
       </div>
 
-      <!-- 错误状态 -->
       <div v-else-if="loadError" class="state-container error-state">
         <div class="error-icon-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -77,39 +47,31 @@
         <button @click="getNovels" class="retry-btn">重新加载</button>
       </div>
 
-      <!-- 空状态 -->
       <div v-else-if="novels.length === 0" class="state-container empty-state">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
           <line x1="9" y1="15" x2="15" y2="15"></line>
         </svg>
-        <p>暂无相关小说</p>
+        <p>暂无相关作品</p>
       </div>
 
-      <!-- 小说网格 -->
       <div v-else class="novel-grid">
         <div v-for="novel in novels" :key="novel.novelId" class="novel-card">
           <router-link :to="`/novel/detail/${novel.novelId}`" class="card-link">
-            <!-- 封面区域 -->
             <div class="card-cover">
               <img v-if="novel.coverImage" :src="novel.coverImage" :alt="novel.novelName">
               <div v-else class="cover-placeholder">
                 <span>{{ novel.novelName.charAt(0) }}</span>
               </div>
-
-              <!-- 状态标签 -->
               <div class="status-badge" :class="'status-' + novel.novelStatus">
                 {{ getNovelStatusText(novel.novelStatus) }}
               </div>
-
-              <!-- 悬浮遮罩 -->
               <div class="cover-mask">
                 <span class="view-detail">查看详情</span>
               </div>
             </div>
 
-            <!-- 信息区域 -->
             <div class="card-body">
               <h3 class="book-title">{{ novel.novelName }}</h3>
               <p class="book-desc">{{ novel.content }}</p>
@@ -143,7 +105,6 @@
       </div>
     </main>
 
-    <!-- 底部 -->
     <footer v-if="novels.length > 0" class="page-footer">
       <p>已为您展示 {{ novels.length }} 部作品</p>
     </footer>
@@ -160,8 +121,6 @@ const novels = ref([])
 const loading = ref(false)
 const loadError = ref('')
 const searchKeyword = ref('')
-const statusFilter = ref('')
-const sortBy = ref('default')
 
 const getNovelStatusText = (status) => {
   const map = { 0: '连载中', 1: '已完结', 2: '暂停' }
@@ -180,29 +139,13 @@ const getNovels = async () => {
     loading.value = true
     loadError.value = ''
 
-    const response = await axios.get('/api/novel/list', {
-      timeout: 10000
-    })
-
+    const response = await axios.get('/api/novel/list', { timeout: 10000 })
 
     if (response.status === 200) {
       const { code, message, data } = response.data
       if (code === 200 || message === 'success') {
         let novelData = data || []
         if (!Array.isArray(novelData)) novelData = []
-
-        // 筛选逻辑
-        if (statusFilter.value !== '') {
-          novelData = novelData.filter(novel => novel.novelStatus === parseInt(statusFilter.value))
-        }
-
-        // 排序逻辑
-        switch (sortBy.value) {
-          case 'click': novelData.sort((a, b) => (b.clickCount || 0) - (a.clickCount || 0)); break
-          case 'collect': novelData.sort((a, b) => (b.collectCount || 0) - (a.collectCount || 0)); break
-          case 'score': novelData.sort((a, b) => (b.score || 0) - (a.score || 0)); break
-          case 'update': novelData.sort((a, b) => new Date(b.lastUpdateTime || 0) - new Date(a.lastUpdateTime || 0)); break
-        }
 
         novels.value = novelData
       } else {
@@ -217,8 +160,6 @@ const getNovels = async () => {
   }
 }
 
-const handleFilter = () => getNovels()
-const handleSort = () => getNovels()
 const handleSearch = () => {
   if (searchKeyword.value.trim()) {
     router.push(`/novel/search?keyword=${encodeURIComponent(searchKeyword.value.trim())}`)
@@ -250,7 +191,7 @@ onMounted(() => getNovels())
 .title {
   font-size: 2rem;
   font-weight: 800;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   display: inline-flex;
   align-items: center;
   gap: 0.8rem;
@@ -260,95 +201,47 @@ onMounted(() => getNovels())
 .title-icon {
   width: 32px;
   height: 32px;
-  color: #667eea;
+  color: #4facfe;
 }
 
 .subtitle {
-  color: #888;
+  color: rgba(168, 216, 234, 0.6);
   font-size: 1rem;
   margin: 0;
 }
 
-/* --- 工具栏 (玻璃态) --- */
+/* --- 工具栏 --- */
 .toolbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  padding: 1.2rem 1.8rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.filter-group {
-  display: flex;
-  gap: 1rem;
-}
-
-.select-wrapper {
-  position: relative;
-}
-
-.select-wrapper select {
-  appearance: none;
-  padding: 0.7rem 2.5rem 0.7rem 1.2rem;
-  border-radius: 30px;
-  border: 1px solid rgba(0,0,0,0.08);
-  background: #fff;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #555;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-}
-
-.select-wrapper select:hover {
-  border-color: #a18cd1;
-}
-
-.select-wrapper select:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-}
-
-.arrow-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: #999;
-  pointer-events: none;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* --- 搜索框 --- */
 .search-box {
   display: flex;
   align-items: center;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 30px;
   padding: 0.3rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s;
 }
 
 .search-box:focus-within {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+  border-color: #4facfe;
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.15);
 }
 
 .search-icon {
   width: 20px;
   height: 20px;
   margin-left: 1rem;
-  color: #999;
+  color: rgba(168, 216, 234, 0.5);
 }
 
 .search-box input {
@@ -357,7 +250,11 @@ onMounted(() => getNovels())
   padding: 0.5rem 1rem;
   font-size: 0.95rem;
   width: 220px;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.search-box input::placeholder {
+  color: rgba(168, 216, 234, 0.4);
 }
 
 .search-box input:focus {
@@ -365,7 +262,7 @@ onMounted(() => getNovels())
 }
 
 .search-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
   border-radius: 25px;
@@ -397,8 +294,8 @@ onMounted(() => getNovels())
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #667eea;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-top: 3px solid #4facfe;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -407,18 +304,22 @@ onMounted(() => getNovels())
 .error-icon-box svg, .empty-state svg {
   width: 60px;
   height: 60px;
-  color: #ddd;
+  color: rgba(255, 255, 255, 0.15);
   margin-bottom: 1rem;
 }
 
 .error-text {
-  color: #ff4757;
+  color: #ff6b81;
   margin-bottom: 1.5rem;
   max-width: 400px;
 }
 
+.state-container p {
+  color: rgba(168, 216, 234, 0.6);
+}
+
 .retry-btn {
-  background: #667eea;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
   padding: 0.6rem 2rem;
@@ -435,17 +336,19 @@ onMounted(() => getNovels())
 }
 
 .novel-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .novel-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 15px 30px rgba(79, 172, 254, 0.15);
 }
 
 .card-link {
@@ -459,7 +362,7 @@ onMounted(() => getNovels())
   position: relative;
   height: 200px;
   overflow: hidden;
-  background: #f0f2f5;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .card-cover img {
@@ -479,7 +382,7 @@ onMounted(() => getNovels())
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   font-size: 4rem;
   font-weight: bold;
@@ -499,7 +402,7 @@ onMounted(() => getNovels())
   z-index: 2;
 }
 
-.status-0 { background: #667eea; }
+.status-0 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 .status-1 { background: #00b894; }
 .status-2 { background: #fdcb6e; color: #333; }
 
@@ -539,7 +442,7 @@ onMounted(() => getNovels())
 .book-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   margin: 0 0 0.5rem;
   white-space: nowrap;
   overflow: hidden;
@@ -548,9 +451,9 @@ onMounted(() => getNovels())
 
 .book-desc {
   font-size: 0.85rem;
-  color: #888;
+  color: rgba(168, 216, 234, 0.6);
   line-height: 1.5;
-  height: 2.55em; /* 限制两行 */
+  height: 2.55em;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -563,7 +466,7 @@ onMounted(() => getNovels())
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8rem;
-  color: #667eea;
+  color: #4facfe;
   margin-bottom: 1rem;
   white-space: nowrap;
   overflow: hidden;
@@ -581,7 +484,7 @@ onMounted(() => getNovels())
   display: flex;
   justify-content: space-between;
   padding-top: 1rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .stat-item {
@@ -590,13 +493,13 @@ onMounted(() => getNovels())
   align-items: center;
   gap: 4px;
   font-size: 0.8rem;
-  color: #999;
+  color: rgba(168, 216, 234, 0.6);
 }
 
 .stat-item svg {
   width: 16px;
   height: 16px;
-  stroke: #999;
+  stroke: rgba(168, 216, 234, 0.5);
 }
 
 .stat-item.highlight svg {
@@ -607,13 +510,14 @@ onMounted(() => getNovels())
 
 .stat-item span {
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* --- 页脚 --- */
 .page-footer {
   text-align: center;
   padding-top: 3rem;
-  color: #aaa;
+  color: rgba(168, 216, 234, 0.5);
   font-size: 0.9rem;
 }
 
@@ -629,21 +533,8 @@ onMounted(() => getNovels())
     align-items: stretch;
   }
 
-  .filter-group {
-    width: 100%;
-  }
-
-  .select-wrapper {
-    flex: 1;
-  }
-
-  .select-wrapper select {
-    width: 100%;
-  }
-
   .search-box {
     width: 100%;
-    margin-top: 1rem;
   }
 
   .search-box input {

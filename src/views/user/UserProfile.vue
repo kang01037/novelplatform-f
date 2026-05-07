@@ -351,17 +351,18 @@ onMounted(() => loadUserProfile())
 
 /* --- 卡片样式 --- */
 .profile-card {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
   border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .card-header-bg {
   height: 120px;
-  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  background: linear-gradient(135deg, #1a2a3a 0%, #1e3a4f 100%);
   position: absolute;
   top: 0;
   left: 0;
@@ -389,8 +390,8 @@ onMounted(() => loadUserProfile())
   height: 140px;
   border-radius: 50%;
   padding: 4px;
-  background: linear-gradient(135deg, #fff 0%, #fff 100%); /* 背景色 */
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
   position: relative;
 }
 
@@ -399,7 +400,7 @@ onMounted(() => loadUserProfile())
   height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  background: #f0f2f5;
+  background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -417,7 +418,7 @@ onMounted(() => loadUserProfile())
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   font-size: 3.5rem;
   font-weight: bold;
@@ -452,12 +453,12 @@ onMounted(() => loadUserProfile())
 .username-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   margin: 0.5rem 0 0.2rem;
 }
 
 .user-role {
-  color: #888;
+  color: rgba(168, 216, 234, 0.6);
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
 }
@@ -486,22 +487,22 @@ onMounted(() => loadUserProfile())
 }
 
 .primary-btn {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  background: rgba(79, 172, 254, 0.15);
+  color: #4facfe;
 }
 
 .primary-btn:hover {
-  background: #667eea;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
 }
 
 .danger-btn {
-  background: rgba(255, 71, 87, 0.1);
-  color: #ff4757;
+  background: rgba(255, 107, 129, 0.15);
+  color: #ff6b81;
 }
 
 .danger-btn:hover {
-  background: #ff4757;
+  background: #ff6b81;
   color: white;
 }
 
@@ -516,18 +517,18 @@ onMounted(() => loadUserProfile())
 .state-container {
   text-align: center;
   padding: 3rem;
-  color: #888;
+  color: rgba(168, 216, 234, 0.6);
 }
 
 .state-container.error {
-  color: #ff4757;
+  color: #ff6b81;
 }
 
 .spinner {
   width: 24px;
   height: 24px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #667eea;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-top: 3px solid #4facfe;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -548,7 +549,7 @@ onMounted(() => loadUserProfile())
 }
 
 .info-item {
-  background: #f9f9ff;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 16px;
   padding: 1rem;
   display: flex;
@@ -559,24 +560,25 @@ onMounted(() => loadUserProfile())
 
 .info-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .info-icon-box {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a18cd1;
+  stroke: #4facfe;
   flex-shrink: 0;
 }
 
 .info-icon-box svg {
   width: 20px;
   height: 20px;
+  stroke: #4facfe;
 }
 
 .info-content {
@@ -587,14 +589,14 @@ onMounted(() => loadUserProfile())
 
 .info-label {
   font-size: 0.8rem;
-  color: #999;
+  color: rgba(168, 216, 234, 0.5);
   margin-bottom: 2px;
 }
 
 .info-value {
   font-size: 1rem;
   font-weight: 600;
-  color: #333;
+  color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -615,7 +617,7 @@ onMounted(() => loadUserProfile())
   display: block;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #555;
+  color: rgba(168, 216, 234, 0.7);
   margin-bottom: 0.5rem;
 }
 
@@ -623,19 +625,28 @@ onMounted(() => loadUserProfile())
 .input-wrapper select {
   width: 100%;
   padding: 0.8rem 1rem;
-  border: 2px solid #eee;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   font-size: 1rem;
   transition: all 0.3s;
-  background: #fff;
-  color: #333;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .input-wrapper input:focus,
 .input-wrapper select:focus {
-  border-color: #a18cd1;
-  box-shadow: 0 0 0 3px rgba(161, 140, 209, 0.1);
+  border-color: #4facfe;
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
   outline: none;
+}
+
+.input-wrapper input::placeholder {
+  color: rgba(168, 216, 234, 0.4);
+}
+
+.input-wrapper select option {
+  background: #1a2a3a;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* --- 按钮区域 --- */
@@ -645,7 +656,7 @@ onMounted(() => loadUserProfile())
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .btn {
@@ -662,33 +673,33 @@ onMounted(() => loadUserProfile())
 }
 
 .edit-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
 }
 
 .edit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
 }
 
 .save-btn {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
 }
 
 .cancel-btn {
-  background: #f0f2f5;
-  color: #666;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .logout-btn {
-  background: rgba(255, 71, 87, 0.1);
-  color: #ff4757;
+  background: rgba(255, 107, 129, 0.15);
+  color: #ff6b81;
 }
 
 .logout-btn:hover {
-  background: #ff4757;
+  background: #ff6b81;
   color: white;
 }
 

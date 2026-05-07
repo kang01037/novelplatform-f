@@ -539,8 +539,16 @@ const handleCommentPageChange = (page) => {
 }
 
 const logout = () => {
+  // 通知服务端吊销 refresh token
+  const refreshToken = localStorage.getItem('refreshToken')
+  if (refreshToken) {
+    import('../../api').then(({ authApi }) => {
+      authApi.logout(refreshToken).catch(() => {})
+    })
+  }
   // 清空所有本地存储数据
-  localStorage.removeItem('token')
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
   localStorage.removeItem('username')
   localStorage.removeItem('userId')
   localStorage.removeItem('userStatus')
@@ -561,7 +569,7 @@ onMounted(() => {
 <style scoped>
 .admin-container {
   padding: 2rem;
-  background: #f5f7fa;
+  background: transparent;
   min-height: calc(100vh - 200px);
 }
 
@@ -569,7 +577,10 @@ onMounted(() => {
   max-width: 1400px;
   margin: 0 auto;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .card-header {
@@ -582,7 +593,7 @@ onMounted(() => {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #333;
+  color: white;
 }
 
 :deep(.el-tabs__header) {
@@ -592,20 +603,87 @@ onMounted(() => {
 :deep(.el-tabs__item) {
   font-size: 1rem;
   padding: 0 20px;
+  color: rgba(168, 216, 234, 0.6);
+}
+
+:deep(.el-tabs__item.is-active) {
+  color: #4facfe;
+}
+
+:deep(.el-tabs__active-bar) {
+  background-color: #4facfe;
 }
 
 :deep(.el-table) {
   font-size: 0.95rem;
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 :deep(.el-table th) {
-  background-color: #f5f7fa;
-  color: #606266;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: rgba(168, 216, 234, 0.8);
   font-weight: 600;
+}
+
+:deep(.el-table td) {
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+:deep(.el-table tr) {
+  background-color: transparent;
+}
+
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+:deep(.el-table__body tr:hover > td) {
+  background-color: rgba(79, 172, 254, 0.08) !important;
+}
+
+:deep(.el-table__header-wrapper) {
+  background-color: transparent;
+}
+
+:deep(.el-table__inner-wrapper) {
+  background-color: transparent;
+}
+
+:deep(.el-table__border-left-pattern), :deep(.el-table__border-right-pattern) {
+  display: none;
+}
+
+:deep(.el-table--border) {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:deep(.el-table__cell) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 :deep(.el-pagination) {
   display: flex;
+  padding-top: 16px;
+}
+
+:deep(.el-pagination button),
+:deep(.el-pager li),
+:deep(.el-pagination .el-pagination__total),
+:deep(.el-pagination .el-pagination__jump) {
+  color: rgba(168, 216, 234, 0.6);
+  background: transparent;
+}
+
+:deep(.el-pager li.active) {
+  color: #4facfe;
+}
+
+:deep(.el-pagination .el-input__inner) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 :deep(.el-tag) {
@@ -617,7 +695,7 @@ onMounted(() => {
 }
 
 :deep(.el-card__header) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   padding: 16px 20px;
   border-bottom: none;
@@ -631,5 +709,29 @@ onMounted(() => {
 
 :deep(.card-header .el-button:hover) {
   background: rgba(255, 255, 255, 0.3);
+}
+
+:deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+:deep(.el-input__wrapper:hover) {
+  border-color: rgba(79, 172, 254, 0.5);
+}
+
+:deep(.el-input__inner) {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:deep(.el-input-group__append) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:deep(.el-input__inner::placeholder) {
+  color: rgba(168, 216, 234, 0.3);
 }
 </style>
