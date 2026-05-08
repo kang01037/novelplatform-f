@@ -27,37 +27,36 @@
         <!-- 导航菜单 -->
         <nav class="nav-menu">
           <div class="nav-links">
-            <!-- 普通用户菜单 -->
-            <template v-if="!isWriter">
-              <router-link to="/novel/hot" class="nav-item">
-                <svg-icon name="fire" />
-                <span>热门推荐</span>
-              </router-link>
-              <router-link to="/novel/list" class="nav-item">
-                <svg-icon name="book" />
-                <span>书库</span>
-              </router-link>
-              <router-link to="/bookshelf" class="nav-item">
-                <svg-icon name="bookmark" />
-                <span>我的书架</span>
-              </router-link>
-              <router-link to="/novel/completed" class="nav-item">
-                <svg-icon name="check-circle" />
-                <span>完本精选</span>
-              </router-link>
-              <router-link to="/novel/category" class="nav-item">
-                <svg-icon name="grid" />
-                <span>分类浏览</span>
-              </router-link>
-            </template>
+            <!-- 用户端（读者）菜单 -->
+            <router-link to="/novel/hot" class="nav-item">
+              <svg-icon name="fire" />
+              <span>热门推荐</span>
+            </router-link>
+            <router-link to="/novel/list" class="nav-item">
+              <svg-icon name="book" />
+              <span>书库</span>
+            </router-link>
+            <router-link to="/novel/completed" class="nav-item">
+              <svg-icon name="check-circle" />
+              <span>完本精选</span>
+            </router-link>
+            <router-link to="/novel/category" class="nav-item">
+              <svg-icon name="grid" />
+              <span>分类浏览</span>
+            </router-link>
+            <router-link v-if="isLoggedIn" to="/bookshelf" class="nav-item">
+              <svg-icon name="bookmark" />
+              <span>我的书架</span>
+            </router-link>
 
-            <!-- 作家菜单 -->
-            <template v-else>
-              <router-link to="/writer/novels" class="nav-item">
+            <!-- 作者端菜单 -->
+            <template v-if="isWriter">
+              <div class="nav-divider"></div>
+              <router-link to="/writer/novels" class="nav-item writer-nav">
                 <svg-icon name="edit" />
                 <span>作品管理</span>
               </router-link>
-              <router-link to="/writer/novel/create" class="nav-item">
+              <router-link to="/writer/novel/create" class="nav-item writer-nav">
                 <svg-icon name="plus" />
                 <span>创建新作</span>
               </router-link>
@@ -112,7 +111,7 @@
         <p class="copyright">© 2026 NovelHub. All rights reserved.</p>
         <div class="footer-actions">
           <router-link
-              v-if="!isWriter"
+              v-if="!isWriter && isLoggedIn"
               to="/register/writer"
               class="fancy-btn writer-btn"
           >
@@ -411,6 +410,39 @@ watch(() => route.path, () => {
 }
 
 .nav-item.router-link-active .icon {
+  color: #4facfe;
+}
+
+.nav-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 0.5rem;
+}
+
+.writer-nav {
+  color: rgba(79, 172, 254, 0.8);
+}
+
+.writer-nav .icon {
+  color: rgba(79, 172, 254, 0.6);
+}
+
+.writer-nav:hover {
+  color: #4facfe;
+  background: rgba(79, 172, 254, 0.15);
+}
+
+.writer-nav:hover .icon {
+  color: #4facfe;
+}
+
+.writer-nav.router-link-active {
+  color: #4facfe;
+  background: rgba(79, 172, 254, 0.15);
+}
+
+.writer-nav.router-link-active .icon {
   color: #4facfe;
 }
 
