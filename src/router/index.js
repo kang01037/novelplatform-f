@@ -22,6 +22,16 @@ const routes = [
     name: 'WriterRegister',
     component: () => import('../views/user/WriterRegister.vue')
   },
+  {
+    path: '/register/admin',
+    name: 'AdminRegister',
+    component: () => import('../views/user/AdminRegister.vue')
+  },
+  {
+    path: '/login/admin',
+    name: 'AdminLogin',
+    component: () => import('../views/user/AdminLogin.vue')
+  },
   
   // ==================== 用户端（读者功能）====================
   {
@@ -133,8 +143,7 @@ const routes = [
   {
     path: '/admin/dashboard',
     name: 'AdminManage',
-    component: () => import('../views/management/AdminManage.vue'),
-    meta: { role: 'admin' }
+    component: () => import('../views/management/AdminManage.vue')
   },
   
   // 无权限页面
@@ -159,40 +168,21 @@ const router = createRouter({
 })
 
 // 路由守卫 - 根据角色控制访问权限
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const accessToken = localStorage.getItem('accessToken')
   const userStatus = parseInt(localStorage.getItem('userStatus') || '1')
-  const loginRole = localStorage.getItem('loginRole') || 'reader'
 
-  // 需要登录的页面
   if (to.meta.requiresAuth && !accessToken) {
-    next('/login')
-    return
+    return '/login'
   }
 
-  // 角色权限检查
   if (to.meta.role) {
     const requiredRole = to.meta.role
-    
-    // 作者端页面：需要 userStatus >= 2
+
     if (requiredRole === 'writer' && userStatus < 2) {
-      next('/unauthorized')
-      return
-    }
-    
-    // 管理者端页面：需要 userStatus >= 3
-    if (requiredRole === 'admin' && userStatus < 3) {
-      next('/unauthorized')
-      return
-    }
-    
-    // 读者端页面：所有用户都可以访问（包括作者和管理员）
-    if (requiredRole === 'reader') {
-      // 读者页面所有人都可以访问
+      return '/unauthorized'
     }
   }
-
-  next()
 })
 
 export default router

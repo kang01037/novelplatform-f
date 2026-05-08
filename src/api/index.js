@@ -24,10 +24,11 @@ api.interceptors.response.use(
   async error => {
     const originalRequest = error.config
 
-    // 仅对 401 且非刷新请求本身做自动续签
+    // 仅对需要认证的请求且非刷新请求本身做自动续签
     if (error.response?.status === 401
       && !originalRequest._retry
-      && !originalRequest.url?.includes('/auth/refresh')) {
+      && !originalRequest.url?.includes('/auth/refresh')
+      && originalRequest.headers?.Authorization) {
 
       if (isRefreshing) {
         // 正在刷新中，排队等待
@@ -60,14 +61,13 @@ api.interceptors.response.use(
       } catch (e) {
         pendingRequests.forEach(p => p.reject(e))
         pendingRequests = []
-        // 刷新失败，清除登录态
+        // 刷新失败，清除登录态，但不跳转页面
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('username')
         localStorage.removeItem('userId')
         localStorage.removeItem('userStatus')
         localStorage.removeItem('userInfo')
-        window.location.href = '/login'
         return Promise.reject(e)
       } finally {
         isRefreshing = false

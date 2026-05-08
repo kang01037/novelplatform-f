@@ -1,0 +1,84 @@
+{
+  "novels": [
+    {
+      "novelName": "斗破苍穹",
+      "authorId": 1,
+      "categoryId": 1,
+      "coverImage": "",
+      "content": "讲述了天才少年萧炎在创造了家族空前绝后的修炼纪录后突然成了废人，种种打击接踵而至。就在他即将绝望的时候，一缕灵魂从他的戒指中浮现，一扇全新的大门向他敞开！",
+      "novelStatus": 1
+    },
+    {
+      "novelName": "凡人修仙传",
+      "authorId": 1,
+      "categoryId": 2,
+      "coverImage": "",
+      "content": "一个普通山村小子，偶然下进入到当地江湖小门派，成了一名记名弟子。他以这样的身份，开始了自己的修仙之路。",
+      "novelStatus": 1
+    },
+    {
+      "novelName": "全职高手",
+      "authorId": 1,
+      "categoryId": 6,
+      "coverImage": "",
+      "content": "网游荣耀中被誉为教科书级别的顶尖高手叶修，因为种种原因遭到俱乐部的驱逐。离开职业圈的他，栖身于一家网吧成了一个小小的网管，但是拥有十年游戏经验的他，在荣耀新开的第十区重新投入了游戏，带着对昔日的一些回忆，和一把未完成的自制武器千机伞，开始了重返巅峰之路。",
+      "novelStatus": 1
+    },
+    {
+      "novelName": "遮天",
+      "authorId": 1,
+      "categoryId": 2,
+      "coverImage": "",
+      "content": "冰冷与黑暗并存的宇宙深处，九具庞大的龙尸拉着一口青铜古棺，亘古长存。这是太空探测器在枯寂的宇宙中捕捉到的一幅极其震撼的场面。是远古神灵降临，还是某种未知的文明遗迹？",
+      "novelStatus": 1
+    },
+    {
+      "novelName": "完美世界",
+      "authorId": 1,
+      "categoryId": 2,
+      "coverImage": "",
+      "content": "一粒尘可填海，一根草斩尽日月星辰，弹指间天翻地覆。群雄并起，万族林立，诸圣争霸，乱天动地。问苍茫大地，谁主沉浮？一个少年从大荒中走出，一切从这里开始……",
+      "novelStatus": 1
+    },
+    {
+      "novelName": "都市极品医神",
+      "authorId": 1,
+      "categoryId": 3,
+      "coverImage": "",
+      "content": "一个医学院的废柴学生，意外获得了上古医神传承，从此开启了一段传奇人生。妙手回春，起死回生，看他如何在都市中混得风生水起。",
+      "novelStatus": 0
+    },
+    {
+      "novelName": "鬼吹灯",
+      "authorId": 1,
+      "categoryId": 4,
+      "coverImage": "",
+      "content": "三位当代摸金校尉，为解开部族消失的千古之谜，利用风水秘术，解读天下大山大川的脉搏，寻找一处处失落在大地深处的奇楼古墓。",
+      "novelStatus": 1
+    },
+    {
+      "novelName": "明朝那些事儿",
+      "authorId": 1,
+      "categoryId": 5,
+      "coverImage": "",
+      "content": "这篇文主要讲述的是从1344年到1644年这三百年间关于明朝的一些事情。以史料为基础，以年代和具体人物为主线，并加入了小说的笔法，对明朝十七帝和其他王公权贵和小人物的命运进行全景展示。",
+      "novelStatus": 1
+    },
+    {
+      "novelName": "斗罗大陆",
+      "authorId": 1,
+      "categoryId": 1,
+      "coverImage": "",
+      "content": "唐门外门弟子唐三，因偷学内门绝学为唐门所不容，跳崖明志时却发现没有死，反而以另外一个身份来到了另一个世界，一个属于武魂的世界，名叫斗罗大陆。这里没有魔法，没有斗气，没有武术，却有神奇的武魂。",
+      "novelStatus": 1
+    },
+    {
+      "novelName": "大主宰",
+      "authorId": 1,
+      "categoryId": 1,
+      "coverImage": "",
+      "content": "大千世界，位面交汇，万族林立，群雄荟萃，一位位来自下位面的天之至尊，在这无尽世界，演绎着令人向往的传奇，追求着那主宰之路。",
+      "novelStatus": 1
+    }
+  ]
+}

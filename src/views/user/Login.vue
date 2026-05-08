@@ -113,7 +113,9 @@ const roleLabel = computed(() => {
   return map[role.value] || '读者登录'
 })
 const registerLink = computed(() => {
-  return role.value === 'writer' ? '/register/writer' : '/register'
+  if (role.value === 'writer') return '/register/writer'
+  if (role.value === 'admin') return '/register/admin'
+  return '/register'
 })
 
 onMounted(() => {

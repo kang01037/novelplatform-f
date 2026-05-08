@@ -85,11 +85,11 @@ const snowflakes = ref([])
 
 const enterPortal = (role) => {
   if (role === 'reader') {
-    router.push('/novel/hot')
+    router.push('/novel/list')
   } else if (role === 'writer') {
     router.push('/login?role=writer')
   } else if (role === 'admin') {
-    router.push('/admin/dashboard')
+    router.push('/login/admin')
   }
 }
 

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小说批量导入工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .api-config {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-upload {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .file-upload:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-text {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .file-upload-hint {
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .progress-section {
+            margin-top: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .result-section {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .result-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+
+        .result-error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+
+        .template-section {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .template-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .template-code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 小说批量导入工具</h1>
+        <p class="subtitle">通过JSON文件批量导入小说数据到数据库</p>
+
+        <!-- API配置 -->
+        <div class="section">
+            <div class="section-title">🔧 API配置</div>
+            <div class="api-config">
+                <div class="form-group">
+                    <label>后端API地址</label>
+                    <input type="text" id="apiUrl" value="http://localhost:8080" placeholder="http://localhost:8080">
+                </div>
+                <div class="form-group">
+                    <label>Access Token（可选）</label>
+                    <input type="text" id="accessToken" placeholder="如需认证请填写Token">
+                </div>
+            </div>
+        </div>
+
+        <!-- 文件上传 -->
+        <div class="section">
+            <div class="section-title">📁 上传JSON文件</div>
+            <div class="file-upload" id="fileUploadArea">
+                <input type="file" id="fileInput" accept=".json">
+                <div class="file-upload-icon">📄</div>
+                <div class="file-upload-text">点击选择JSON文件或拖拽文件到此处</div>
+                <div class="file-upload-hint">支持 .json 格式文件</div>
+            </div>
+            <div id="fileName" class="hidden" style="margin-top: 15px; padding: 10px; background: #e8f5e9; border-radius: 8px; color: #2e7d32;"></div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="btn-group">
+            <button class="btn btn-secondary" onclick="downloadTemplate()">📥 下载模板</button>
+            <button class="btn btn-primary" id="importBtn" onclick="startImport()" disabled>🚀 开始导入</button>
+        </div>
+
+        <!-- 进度显示 -->
+        <div class="progress-section hidden" id="progressSection">
+            <div class="section-title">⏳ 导入进度</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">准备中...</div>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="stats hidden" id="statsSection">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="successCount">0</div>
+                <div class="stat-label">成功</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="errorCount">0</div>
+                <div class="stat-label">失败</div>
+            </div>
+        </div>
+
+        <!-- 结果列表 -->
+        <div class="result-section hidden" id="resultSection">
+            <div class="section-title">📊 导入结果</div>
+            <div id="resultList"></div>
+        </div>
+
+        <!-- JSON模板 -->
+        <div class="template-section">
+            <h3>📝 JSON文件格式说明</h3>
+            <div class="template-code">{
+  "novels": [
+    {
+      "novelName": "斗破苍穹",
+      "authorId": 1,
+      "categoryId": 1,
+      "coverImage": "",
+      "content": "讲述了天才少年萧炎在创造了家族空前绝后的修炼纪录后突然成了废人...",
+      "novelStatus": 1
+    },
+    {
+      "novelName": "凡人修仙传",
+      "authorId": 1,
+      "categoryId": 2,
+      "coverImage": "",
+      "content": "一个普通山村小子，偶然下进入到当地江湖小门派，成了一名记名弟子...",
+      "novelStatus": 0
+    }
+  ]
+}
+
+字段说明：
+- novelName: 小说名称（必填）
+- authorId: 作者ID（必填，对应用户表中的user_id）
+- categoryId: 分类ID（必填）
+  1-玄幻奇幻，2-武侠仙侠，3-都市言情，4-科幻灵异，5-历史军事，6-游戏竞技
+- coverImage: 封面图片URL（可选）
+- content: 小说简介（可选）
+- novelStatus: 小说状态（可选）
+  0-连载中，1-已完结，2-暂停中</div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let novelsData = [];
+
+        // 文件上传区域点击
+        document.getElementById('fileUploadArea').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        // 文件选择
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        // 拖拽上传
+        const uploadArea = document.getElementById('fileUploadArea');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f0f2ff';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '#f8f9ff';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f8f9ff';
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.json')) {
+                handleFile(file);
+            } else {
+                alert('请上传JSON格式的文件');
+            }
+        });
+
+        // 处理文件
+        function handleFile(file) {
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.novels && Array.isArray(data.novels)) {
+                        novelsData = data.novels;
+                        document.getElementById('fileName').textContent = `✅ 已加载文件: ${file.name} (共 ${novelsData.length} 部小说)`;
+                        document.getElementById('fileName').classList.remove('hidden');
+                        document.getElementById('importBtn').disabled = false;
+                    } else {
+                        alert('JSON文件格式错误，请确保包含 novels 数组');
+                    }
+                } catch (err) {
+                    alert('JSON文件解析失败: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 下载模板
+        function downloadTemplate() {
+            const template = {
+                novels: [
+                    {
+                        novelName: "斗破苍穹",
+                        authorId: 1,
+                        categoryId: 1,
+                        coverImage: "",
+                        content: "讲述了天才少年萧炎在创造了家族空前绝后的修炼纪录后突然成了废人...",
+                        novelStatus: 1
+                    },
+                    {
+                        novelName: "凡人修仙传",
+                        authorId: 1,
+                        categoryId: 2,
+                        coverImage: "",
+                        content: "一个普通山村小子，偶然下进入到当地江湖小门派，成了一名记名弟子...",
+                        novelStatus: 0
+                    }
+                ]
+            };
+
+            const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'novels_template.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 开始导入
+        async function startImport() {
+            if (novelsData.length === 0) {
+                alert('没有可导入的数据');
+                return;
+            }
+
+            const apiUrl = document.getElementById('apiUrl').value.replace(/\/$/, '');
+            const accessToken = document.getElementById('accessToken').value;
+
+            // 显示进度区域
+            document.getElementById('progressSection').classList.remove('hidden');
+            document.getElementById('statsSection').classList.remove('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+            document.getElementById('importBtn').disabled = true;
+
+            // 初始化统计
+            let successCount = 0;
+            let errorCount = 0;
+            const results = [];
+
+            document.getElementById('totalCount').textContent = novelsData.length;
+
+            // 逐个导入
+            for (let i = 0; i < novelsData.length; i++) {
+                const novel = novelsData[i];
+                const progress = ((i + 1) / novelsData.length) * 100;
+
+                // 更新进度
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressText').textContent = `正在导入: ${novel.novelName} (${i + 1}/${novelsData.length})`;
+
+                try {
+                    const response = await fetch(`${apiUrl}/api/novel/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
+                        },
+                        body: JSON.stringify(novel)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.code === 200 || result.message === 'success') {
+                        successCount++;
+                        results.push({
+                            type: 'success',
+                            message: `✅ ${novel.novelName} - 导入成功`
+                        });
+                    } else {
+                        errorCount++;
+                        results.push({
+                            type: 'error',
+                            message: `❌ ${novel.novelName} - ${result.message || '导入失败'}`
+                        });
+                    }
+                } catch (err) {
+                    errorCount++;
+                    results.push({
+                        type: 'error',
+                        message: `❌ ${novel.novelName} - 网络错误: ${err.message}`
+                    });
+                }
+
+                // 更新统计
+                document.getElementById('successCount').textContent = successCount;
+                document.getElementById('errorCount').textContent = errorCount;
+
+                // 更新结果列表
+                updateResults(results);
+
+                // 添加延迟避免请求过快
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            // 完成
+            document.getElementById('progressText').textContent = `导入完成！成功 ${successCount} 部，失败 ${errorCount} 部`;
+            document.getElementById('importBtn').disabled = false;
+        }
+
+        // 更新结果列表
+        function updateResults(results) {
+            const resultList = document.getElementById('resultList');
+            resultList.innerHTML = results.map(r => 
+                `<div class="result-item result-${r.type}">${r.message}</div>`
+            ).join('');
+            
+            // 滚动到底部
+            resultList.scrollTop = resultList.scrollHeight;
+        }
+    </script>
+</body>
+</html>
