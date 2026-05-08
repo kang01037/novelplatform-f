@@ -240,11 +240,11 @@ const getUserInfo = async (userId) => {
   if (userCache.value[userId]) return userCache.value[userId]
   try {
     const response = await userApi.getUser(userId)
-    if (response.data.code === 200 || response.data.message === 'success') {
-      const userInfo = response.data.data
+    const { code, message, data } = response.data
+    if (code === 200 || message === 'success') {
       userCache.value[userId] = {
-        username: userInfo.username || `用户${userId}`,
-        avatar: userInfo.avatar || null
+        username: data.username || `用户${userId}`,
+        avatar: data.avatar || null
       }
       return userCache.value[userId]
     }
@@ -258,8 +258,9 @@ const getComments = async () => {
   try {
     commentsLoading.value = true
     const response = await commentApi.getCommentsByNovel(novelId)
-    if (response.data.code === 200 || response.data.message === 'success') {
-      const commentList = response.data.data || []
+    const { code, message, data } = response.data
+    if (code === 200 || message === 'success') {
+      const commentList = data || []
       for (const comment of commentList) {
         const userInfo = await getUserInfo(comment.userId)
         comment.username = userInfo.username
@@ -286,11 +287,12 @@ const submitComment = async () => {
       parentId: null,
       content: newComment.value.content.trim()
     })
-    if (response.data.code === 200 || response.data.message === 'success') {
+    const { code, message } = response.data
+    if (code === 200 || message === 'success' || message === '评论成功') {
       alert('✅ 评论成功')
       newComment.value.content = ''
       await getComments()
-    } else { alert(response.data.message || '评论失败') }
+    } else { alert(message || '评论失败') }
   } catch (err) {
     console.error('发表评论失败:', err)
     alert('发表评论失败，请稍后重试')
@@ -304,7 +306,8 @@ const likeComment = async (commentId) => {
   liking.value = true
   try {
     const response = await commentApi.likeComment(commentId)
-    if (response.data.code === 200 || response.data.message === 'success') {
+    const { code, message } = response.data
+    if (code === 200 || message === 'success' || message === '点赞成功') {
       const comment = comments.value.find(c => c.commentId === commentId)
       if (comment) comment.likeCount = (comment.likeCount || 0) + 1
     }
@@ -345,14 +348,16 @@ const loadData = async () => {
   try {
     loading.value = true; error.value = ''
     const novelResponse = await novelApi.getNovel(novelId)
-    if (novelResponse.data.code === 200 || novelResponse.data.message === 'success') {
-      novel.value = novelResponse.data.data
+    const { code, message, data } = novelResponse.data
+    if (code === 200 || message === 'success') {
+      novel.value = data
       novelApi.addClick(novelId).catch(() => {})
-    } else { error.value = novelResponse.data.message || '获取详情失败'; return }
+    } else { error.value = message || '获取详情失败'; return }
 
     const chapterResponse = await chapterApi.getLatestChapter(novelId)
-    if (chapterResponse.data.code === 200 || chapterResponse.data.message === 'success') {
-      lastChapter.value = chapterResponse.data.data
+    const chapterData = chapterResponse.data
+    if (chapterData.code === 200 || chapterData.message === 'success') {
+      lastChapter.value = chapterData.data
     }
     await getComments()
   } catch (err) {
@@ -366,10 +371,11 @@ const addToBookshelf = async () => {
   try {
     const userId = localStorage.getItem('userId') || '1'
     const response = await bookshelfApi.addToBookshelf({ userId: parseInt(userId), novelId: parseInt(novelId) })
-    if (response.data.code === 200 || response.data.message === 'success') {
+    const { code, message } = response.data
+    if (code === 200 || message === 'success' || message === '加入书架成功') {
       alert('✅ 加入书架成功')
       novelApi.addCollect(novelId).catch(() => {})
-    } else { alert(response.data.message || '失败') }
+    } else { alert(message || '失败') }
   } catch (err) {
     console.error(err); alert('加入书架成功')
   }
@@ -392,12 +398,13 @@ const recommendNovel = async () => {
     }
 
     const response = await novelApi.addRecommend(novelId)
-    if (response.data.code === 200 || response.data.message === 'success') {
+    const { code, message } = response.data
+    if (code === 200 || message === 'success' || message === '推荐量已更新') {
       alert('✅ 推荐成功！感谢您的支持')
       hasRecommended.value = true
       novel.value.recommendCount = (novel.value.recommendCount || 0) + 1
     } else {
-      alert(response.data.message || '推荐失败')
+      alert(message || '推荐失败')
     }
   } catch (err) {
     console.error('推荐失败:', err)
@@ -413,7 +420,8 @@ const submitScore = async () => {
     const scoreCount = novel.value.scoreCount || 0
     const newScore = (currentScore * scoreCount + score.value) / (scoreCount + 1)
     const response = await novelApi.rateNovel(novelId, { score: newScore, scoreCount: scoreCount + 1 })
-    if (response.data.code === 200 || response.data.message === 'success') {
+    const { code, message } = response.data
+    if (code === 200 || message === 'success' || message === '评分成功') {
       alert(`✅ 评分成功！`)
       showScoreModal.value = false
       await loadData()

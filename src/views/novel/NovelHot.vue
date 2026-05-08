@@ -150,9 +150,10 @@ const getNovels = async () => {
     loading.value = true
     loadError.value = ''
 
-    const response = await novelApi.getNovels()
-    if (response.data.code === 200 || response.data.message === 'success') {
-      let novelData = response.data.data || []
+    const response = await novelApi.getHotNovels()
+    const { code, message, data } = response.data
+    if (code === 200 || message === 'success') {
+      let novelData = data || []
       if (!Array.isArray(novelData)) novelData = []
 
       // 搜索过滤
@@ -169,7 +170,7 @@ const getNovels = async () => {
 
       novels.value = novelData
     } else {
-      loadError.value = response.data.message || '获取数据失败'
+      loadError.value = message || '获取数据失败'
     }
   } catch (err) {
     console.error('获取推荐列表失败:', err)

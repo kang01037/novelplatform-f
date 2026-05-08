@@ -48,17 +48,19 @@ const getBookshelfItems = async () => {
     const response = await bookshelfApi.getBookshelfByUser(parseInt(userId))
     console.log('书架列表响应:', response)
 
-    if (response.data.code === '200' || response.data.message === 'success') {
-      const items = response.data.data || []
+    const { code, message, data } = response.data
+    if (code === 200 || message === 'success') {
+      const items = data || []
       console.log('书架列表:', items)
 
       // 获取小说名称
       for (const item of items) {
         try {
           const novelResponse = await novelApi.getNovel(item.novelId)
-          if (novelResponse.data.code === '200' || novelResponse.data.message === 'success') {
-            item.novelName = novelResponse.data.data.novelName
-            item.novelCover = novelResponse.data.data.coverImage
+          const novelData = novelResponse.data
+          if (novelData.code === 200 || novelData.message === 'success') {
+            item.novelName = novelData.data.novelName
+            item.novelCover = novelData.data.coverImage
           }
         } catch (novelError) {
           console.error(`获取小说${item.novelId}信息失败:`, novelError)
@@ -95,11 +97,12 @@ const removeFromBookshelf = async (id) => {
         userId: parseInt(userId),
         novelId: item.novelId
       })
-      if (response.data.code === '200' || response.data.message === 'success') {
+      const { code, message } = response.data
+      if (code === 200 || message === 'success' || message === '移出书架成功') {
         alert('移除成功')
         await getBookshelfItems()
       } else {
-        alert(response.data.message || '移除失败')
+        alert(message || '移除失败')
       }
     }
   } catch (error) {

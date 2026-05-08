@@ -232,11 +232,12 @@ const loadUserProfile = async () => {
       return
     }
     const response = await userApi.getUserByUsername(username)
-    if (response.data.code === 200) {
-      user.value = response.data.data
+    const { code, message, data } = response.data
+    if (code === 200 || message === 'success') {
+      user.value = data
       initEditForm()
     } else {
-      error.value = response.data.message || '获取用户信息失败'
+      error.value = message || '获取用户信息失败'
     }
   } catch (err) {
     console.error(err)
@@ -272,11 +273,14 @@ const saveProfile = async () => {
       birthday: editForm.birthday || null
     }
     const response = await userApi.updateUser(updateData)
-    if (response.data.code === 200 || response.data.message === 'success') {
+    const { code, message } = response.data
+    if (code === 200 || message === 'success' || message === '更新成功') {
       alert('修改成功')
       await loadUserProfile()
       isEditing.value = false
-    } else { alert(response.data.message || '修改失败') }
+    } else { 
+      alert(message || '修改失败') 
+    }
   } catch (error) {
     console.error(error)
     alert('修改失败，请检查网络')
@@ -292,7 +296,6 @@ const handleAvatarChange = async (event) => {
   const file = event.target.files[0]
   if (!file) return
 
-  // 简单校验
   if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
     alert('格式不支持'); return
   }
@@ -306,12 +309,15 @@ const handleAvatarChange = async (event) => {
     formData.append('userId', user.value.userId)
     formData.append('file', file)
     const response = await userApi.uploadAvatar(formData)
+    const { code, message, data } = response.data
 
-    if (response.data.code === 200 || response.data.message === 'success') {
-      const avatarUrl = response.data.data?.avatar || response.data.data
+    if (code === 200 || message === 'success') {
+      const avatarUrl = data?.avatar || data
       user.value.avatar = avatarUrl
       timestamp.value = Date.now()
       alert('上传成功')
+    } else {
+      alert(message || '上传失败')
     }
   } catch (err) {
     console.error(err)
@@ -326,10 +332,13 @@ const removeAvatar = async () => {
   if (!confirm('确定删除头像？')) return
   try {
     const response = await userApi.deleteAvatar(user.value.userId)
-    if (response.data.code === 200 || response.data.message === 'success') {
+    const { code, message } = response.data
+    if (code === 200 || message === 'success' || message === '删除成功') {
       user.value.avatar = null
       timestamp.value = Date.now()
       alert('已删除')
+    } else {
+      alert(message || '删除失败')
     }
   } catch (err) {
     console.error(err)

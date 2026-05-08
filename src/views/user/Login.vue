@@ -130,19 +130,19 @@ const handleLogin = async () => {
   try {
     const response = await userApi.login(form.value)
     const { code, message, data } = response.data
-    if (code === 200 && data) {
-      if (data.accessToken) localStorage.setItem('accessToken', data.accessToken)
-      if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken)
-      if (data.userInfo) {
-        const userInfo = data.userInfo
+    
+    if (code === 200 || message === 'success') {
+      localStorage.setItem('token', data)
+      localStorage.setItem('username', form.value.username)
+      
+      const userInfo = await getUserInfo(form.value.username)
+      if (userInfo) {
         localStorage.setItem('userId', userInfo.userId)
-        localStorage.setItem('username', userInfo.username)
         localStorage.setItem('userStatus', userInfo.userStatus)
         localStorage.setItem('userInfo', JSON.stringify(userInfo))
         localStorage.setItem('loginRole', role.value)
 
         const status = parseInt(userInfo.userStatus)
-        // 根据选择的角色跳转
         if (role.value === 'admin' && status >= 3) {
           router.push('/admin/dashboard')
         } else if (role.value === 'writer' && status >= 2) {
@@ -150,37 +150,54 @@ const handleLogin = async () => {
         } else {
           router.push('/novel/hot')
         }
+      } else {
+        router.push('/novel/hot')
       }
     } else {
       alert(message || '登录失败')
     }
   } catch (error) {
     if (error.response) {
-      const { data } = error.response
-      if (data && data.code === 200 && data.data) {
-        const respData = data.data
-        if (respData.accessToken) localStorage.setItem('accessToken', respData.accessToken)
-        if (respData.refreshToken) localStorage.setItem('refreshToken', respData.refreshToken)
-        if (respData.userInfo) {
-          const userInfo = respData.userInfo
+      const { data, message } = error.response.data
+      if (data && (error.response.data.code === 200 || message === 'success')) {
+        localStorage.setItem('token', data)
+        localStorage.setItem('username', form.value.username)
+        
+        const userInfo = await getUserInfo(form.value.username)
+        if (userInfo) {
           localStorage.setItem('userId', userInfo.userId)
-          localStorage.setItem('username', userInfo.username)
           localStorage.setItem('userStatus', userInfo.userStatus)
           localStorage.setItem('userInfo', JSON.stringify(userInfo))
           localStorage.setItem('loginRole', role.value)
+          
           const status = parseInt(userInfo.userStatus)
           if (role.value === 'admin' && status >= 3) router.push('/admin/dashboard')
           else if (role.value === 'writer' && status >= 2) router.push('/writer/novels')
           else router.push('/novel/hot')
           return
         }
+        router.push('/novel/hot')
+        return
       }
-      alert(data?.message || '用户名或密码错误')
+      alert(message || '用户名或密码错误')
     } else {
       alert('无法连接到服务器')
     }
   } finally {
     loading.value = false
+  }
+}
+
+const getUserInfo = async (username) => {
+  try {
+    const response = await userApi.getUserByUsername(username)
+    if (response.data.code === 200 || response.data.message === 'success') {
+      return response.data.data
+    }
+    return null
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+    return null
   }
 }
 

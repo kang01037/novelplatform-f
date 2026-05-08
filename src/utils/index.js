@@ -74,3 +74,28 @@ export function throttle(fn, delay = 300, options = {}) {
 
   return throttled
 }
+
+export function isSuccess(response) {
+  const data = response?.data || response
+  return data?.code === 200 || data?.message === 'success'
+}
+
+export function getResponseData(response) {
+  return response?.data?.data || response?.data
+}
+
+export function getErrorMessage(response, defaultMsg = '操作失败') {
+  const data = response?.data || response
+  return data?.message || defaultMsg
+}
+
+export function handleApiResponse(response, successCallback, errorCallback) {
+  const data = response?.data || response
+  if (data?.code === 200 || data?.message === 'success') {
+    if (successCallback) successCallback(data.data)
+    return true
+  } else {
+    if (errorCallback) errorCallback(data?.message || '操作失败')
+    return false
+  }
+}

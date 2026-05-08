@@ -118,23 +118,24 @@ const handleRegister = async () => {
       birthday: form.value.birthday || null
     }
     const response = await userApi.register(registerData)
-    if (response.data.code === 200 || response.data.message === 'success') {
+    const { code, message } = response.data
+    if (code === 200 || message === 'success' || message === '注册成功') {
       alert('注册成功，请登录')
       router.push('/login')
     } else {
-      alert(response.data.message || '注册失败')
+      alert(message || '注册失败')
     }
   } catch (error) {
     if (error.response) {
       const { code, message } = error.response.data
-      if (code === 200 && message === 'success') {
+      if (code === 200 || message === 'success' || message === '注册成功') {
         alert('注册成功，请登录')
         router.push('/login')
         return
       }
-      alert(`注册失败：${message || '服务器错误'}`)
+      alert(message || '注册失败')
     } else {
-      alert('注册失败：无法连接到服务器')
+      alert('无法连接到服务器')
     }
   } finally {
     loading.value = false

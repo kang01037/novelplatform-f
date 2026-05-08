@@ -168,13 +168,14 @@ const uploadCover = async (novelId) => {
     formData.append('file', coverImage.value)
 
     const response = await novelApi.uploadCover(formData)
-    if (response.data.code === 200 || response.data.message === 'success') {
-      return response.data.data?.imageUrl || response.data.data
+    const { code, message, data } = response.data
+    if (code === 200 || message === 'success') {
+      return data?.imageUrl || data
     }
     return null
   } catch (error) {
     console.error('封面上传失败:', error)
-    if (error.response?.data?.code === 200) {
+    if (error.response?.data?.code === 200 || error.response?.data?.message === 'success') {
       return error.response.data.data?.imageUrl || error.response.data.data
     }
     return null
@@ -209,12 +210,14 @@ const submitNovel = async () => {
     }
 
     const response = await novelApi.createNovel(novelData)
+    const { code, message } = response.data
 
-    if (response.data.code === 200 || response.data.message === 'success') {
+    if (code === 200 || message === 'success' || message === '小说创建成功') {
       // 2. 查询ID
       const searchResponse = await novelApi.searchNovels(form.novelName)
-      if (searchResponse.data.code === 200 || searchResponse.data.message === 'success') {
-        const novels = searchResponse.data.data || []
+      const searchData = searchResponse.data
+      if (searchData.code === 200 || searchData.message === 'success') {
+        const novels = searchData.data || []
         const novel = novels.find(n => n.novelName === form.novelName && n.authorId === parseInt(userId))
 
         if (novel) {
@@ -237,7 +240,7 @@ const submitNovel = async () => {
         }
       }
     } else {
-      alert(response.data.message || '创建失败')
+      alert(message || '创建失败')
     }
   } catch (error) {
     console.error('创建失败:', error)
