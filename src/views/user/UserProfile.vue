@@ -353,30 +353,60 @@ onMounted(() => loadUserProfile())
 /* --- 基础布局 --- */
 .profile-page-wrapper {
   padding: 2rem;
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* --- 卡片样式 --- */
 .profile-card {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.08);
   overflow: hidden;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .card-header-bg {
-  height: 120px;
-  background: linear-gradient(135deg, #1a2a3a 0%, #1e3a4f 100%);
+  height: 160px;
+  background: linear-gradient(135deg, #0f1923 0%, #1a2a3a 30%, #1e3a4f 60%, #2a4a5f 100%);
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 0;
+  overflow: hidden;
+}
+
+.card-header-bg::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(79, 172, 254, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+.card-header-bg::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, -20px); }
 }
 
 /* --- 头像区域 --- */
@@ -386,22 +416,37 @@ onMounted(() => loadUserProfile())
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 60px;
+  padding-top: 80px;
+  padding-bottom: 2rem;
 }
 
 .avatar-container {
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .avatar-ring {
-  width: 140px;
-  height: 140px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
-  padding: 4px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  padding: 5px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #4facfe 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+  box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3), 0 0 0 4px rgba(79, 172, 254, 0.1);
   position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.avatar-ring:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 40px rgba(79, 172, 254, 0.4), 0 0 0 6px rgba(79, 172, 254, 0.15);
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .avatar {
@@ -409,7 +454,7 @@ onMounted(() => loadUserProfile())
   height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(15, 25, 35, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -419,6 +464,11 @@ onMounted(() => loadUserProfile())
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.avatar-ring:hover .avatar img {
+  transform: scale(1.1);
 }
 
 .avatar-placeholder {
@@ -430,7 +480,8 @@ onMounted(() => loadUserProfile())
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   font-size: 3.5rem;
-  font-weight: bold;
+  font-weight: 700;
+  letter-spacing: -2px;
 }
 
 .avatar-overlay {
@@ -440,12 +491,13 @@ onMounted(() => loadUserProfile())
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s ease;
   cursor: pointer;
 }
 
@@ -454,83 +506,129 @@ onMounted(() => loadUserProfile())
 }
 
 .avatar-overlay svg {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .username-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0.5rem 0 0.2rem;
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #a8d8ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.5px;
 }
 
 .user-role {
-  color: rgba(168, 216, 234, 0.6);
-  font-size: 0.9rem;
+  color: rgba(168, 216, 234, 0.7);
+  font-size: 0.95rem;
   margin-bottom: 1.5rem;
+  padding: 0.3rem 1rem;
+  background: rgba(79, 172, 254, 0.1);
+  border-radius: 20px;
+  border: 1px solid rgba(79, 172, 254, 0.2);
 }
 
 .avatar-actions {
   display: flex;
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 24px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.action-btn:hover::before {
+  left: 100%;
 }
 
 .action-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
+.action-btn:hover svg {
+  transform: scale(1.1);
 }
 
 .primary-btn {
-  background: rgba(79, 172, 254, 0.15);
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.2) 100%);
   color: #4facfe;
+  border: 1px solid rgba(79, 172, 254, 0.3);
 }
 
 .primary-btn:hover {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
+  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+  transform: translateY(-2px);
 }
 
 .danger-btn {
   background: rgba(255, 107, 129, 0.15);
   color: #ff6b81;
+  border: 1px solid rgba(255, 107, 129, 0.3);
 }
 
 .danger-btn:hover {
-  background: #ff6b81;
+  background: linear-gradient(135deg, #ff6b81 0%, #ff8e9e 100%);
   color: white;
+  box-shadow: 0 8px 25px rgba(255, 107, 129, 0.4);
+  transform: translateY(-2px);
 }
 
 /* --- 内容主体 --- */
 .content-body {
-  padding: 2rem;
+  padding: 2.5rem;
   position: relative;
   z-index: 1;
+  background: linear-gradient(180deg, rgba(15, 25, 35, 0.5) 0%, rgba(15, 25, 35, 0.8) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* --- 加载与错误 --- */
 .state-container {
   text-align: center;
-  padding: 3rem;
+  padding: 4rem 2rem;
   color: rgba(168, 216, 234, 0.6);
 }
 
 .state-container.error {
   color: #ff6b81;
+}
+
+.state-container svg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1rem;
+  opacity: 0.6;
 }
 
 .spinner {
@@ -544,74 +642,114 @@ onMounted(() => loadUserProfile())
 }
 
 .spinner.large {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-width: 4px;
 }
 
 /* --- 信息展示网格 --- */
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .info-item {
   background: rgba(255, 255, 255, 0.04);
-  border-radius: 16px;
-  padding: 1rem;
+  border-radius: 18px;
+  padding: 1.2rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  transition: transform 0.2s;
+  gap: 1.2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.info-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.05) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .info-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border-color: rgba(79, 172, 254, 0.2);
+}
+
+.info-item:hover::before {
+  opacity: 1;
 }
 
 .info-icon-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.15) 0%, rgba(0, 242, 254, 0.15) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  stroke: #4facfe;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .info-icon-box svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   stroke: #4facfe;
+  transition: transform 0.3s ease;
+}
+
+.info-item:hover .info-icon-box svg {
+  transform: scale(1.1);
 }
 
 .info-content {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 .info-label {
   font-size: 0.8rem;
   color: rgba(168, 216, 234, 0.5);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
 .info-value {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 /* --- 表单样式 --- */
+.edit-form {
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -626,27 +764,30 @@ onMounted(() => loadUserProfile())
   display: block;
   font-size: 0.9rem;
   font-weight: 600;
-  color: rgba(168, 216, 234, 0.7);
-  margin-bottom: 0.5rem;
+  color: rgba(168, 216, 234, 0.8);
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.3px;
 }
 
 .input-wrapper input,
 .input-wrapper select {
   width: 100%;
-  padding: 0.8rem 1rem;
+  padding: 0.9rem 1.2rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 1rem;
-  transition: all 0.3s;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
 }
 
 .input-wrapper input:focus,
 .input-wrapper select:focus {
   border-color: #4facfe;
-  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+  box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.15);
   outline: none;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .input-wrapper input::placeholder {
@@ -655,71 +796,167 @@ onMounted(() => loadUserProfile())
 
 .input-wrapper select option {
   background: #1a2a3a;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* --- 按钮区域 --- */
 .action-footer, .form-actions {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
+  gap: 1.2rem;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .btn {
-  padding: 0.8rem 2rem;
-  border-radius: 12px;
+  padding: 0.9rem 2.5rem;
+  border-radius: 14px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+}
+
+.btn:hover svg {
+  transform: scale(1.1);
 }
 
 .edit-btn {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.3);
 }
 
 .edit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4);
 }
 
 .save-btn {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.3);
+}
+
+.save-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4);
 }
 
 .cancel-btn {
   background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
 }
 
 .logout-btn {
   background: rgba(255, 107, 129, 0.15);
   color: #ff6b81;
+  border: 1px solid rgba(255, 107, 129, 0.3);
 }
 
 .logout-btn:hover {
-  background: #ff6b81;
+  background: linear-gradient(135deg, #ff6b81 0%, #ff8e9e 100%);
   color: white;
+  box-shadow: 0 8px 25px rgba(255, 107, 129, 0.4);
+  transform: translateY(-2px);
 }
 
 /* --- 动画 --- */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* --- 响应式设计 --- */
+@media (max-width: 768px) {
+  .profile-page-wrapper {
+    padding: 1rem;
+  }
+
+  .profile-card {
+    border-radius: 20px;
+  }
+
+  .card-header-bg {
+    height: 120px;
+  }
+
+  .avatar-section {
+    padding-top: 60px;
+  }
+
+  .avatar-ring {
+    width: 120px;
+    height: 120px;
+  }
+
+  .username-title {
+    font-size: 1.5rem;
+  }
+
+  .content-body {
+    padding: 1.5rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.full-width {
+    grid-column: span 1;
+  }
+
+  .action-footer, .form-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>
