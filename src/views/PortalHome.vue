@@ -1,7 +1,7 @@
 <template>
   <div class="portal-home">
     <div class="snow-bg">
-      <div v-for="n in 40" :key="n" class="snowflake" :style="getSnowflakeStyle(n)"></div>
+      <div v-for="(flake, index) in snowflakes" :key="index" class="snowflake" :style="getSnowflakeStyle(flake)"></div>
     </div>
 
     <div class="portal-content">
@@ -77,9 +77,11 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const snowflakes = ref([])
 
 const enterPortal = (role) => {
   if (role === 'reader') {
@@ -91,21 +93,34 @@ const enterPortal = (role) => {
   }
 }
 
-const getSnowflakeStyle = (n) => {
-  const left = Math.random() * 100
-  const delay = Math.random() * 15
-  const duration = 10 + Math.random() * 20
-  const size = 3 + Math.random() * 10
-  const sway = Math.random() * 100 - 50
+const generateSnowflakes = () => {
+  const flakes = []
+  for (let n = 0; n < 40; n++) {
+    flakes.push({
+      left: Math.random() * 100,
+      delay: Math.random() * 15,
+      duration: 10 + Math.random() * 20,
+      size: 3 + Math.random() * 10,
+      sway: Math.random() * 100 - 50
+    })
+  }
+  return flakes
+}
+
+const getSnowflakeStyle = (flake) => {
   return {
-    left: `${left}%`,
-    animationDelay: `${delay}s`,
-    animationDuration: `${duration}s`,
-    width: `${size}px`,
-    height: `${size}px`,
-    '--sway': `${sway}px`
+    left: `${flake.left}%`,
+    animationDelay: `${flake.delay}s`,
+    animationDuration: `${flake.duration}s`,
+    width: `${flake.size}px`,
+    height: `${flake.size}px`,
+    '--sway': `${flake.sway}px`
   }
 }
+
+onMounted(() => {
+  snowflakes.value = generateSnowflakes()
+})
 </script>
 
 <style scoped>

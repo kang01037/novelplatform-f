@@ -2,7 +2,7 @@
   <div class="login-page">
     <!-- 雪花背景 -->
     <div class="snow-bg">
-      <div v-for="n in 40" :key="n" class="snowflake" :style="getSnowflakeStyle(n)"></div>
+      <div v-for="(flake, index) in snowflakes" :key="index" class="snowflake" :style="getSnowflakeStyle(flake)"></div>
     </div>
 
     <div class="login-wrapper">
@@ -103,6 +103,7 @@ const router = useRouter()
 const route = useRoute()
 const loading = ref(false)
 const role = ref('reader')
+const snowflakes = ref([])
 
 const form = ref({ username: '', password: '' })
 
@@ -119,6 +120,8 @@ onMounted(() => {
   if (route.query.role) {
     role.value = route.query.role
   }
+  // 页面加载时生成一次雪花数据
+  snowflakes.value = generateSnowflakes()
 })
 
 const handleLogin = async () => {
@@ -132,10 +135,11 @@ const handleLogin = async () => {
     const { code, message, data } = response.data
     
     if (code === 200 || message === 'success') {
-      localStorage.setItem('token', data)
+      localStorage.setItem('accessToken', data.accessToken)
+      localStorage.setItem('refreshToken', data.refreshToken)
       localStorage.setItem('username', form.value.username)
       
-      const userInfo = await getUserInfo(form.value.username)
+      const userInfo = data.userInfo
       if (userInfo) {
         localStorage.setItem('userId', userInfo.userId)
         localStorage.setItem('userStatus', userInfo.userStatus)
@@ -160,10 +164,11 @@ const handleLogin = async () => {
     if (error.response) {
       const { data, message } = error.response.data
       if (data && (error.response.data.code === 200 || message === 'success')) {
-        localStorage.setItem('token', data)
+        localStorage.setItem('accessToken', data.accessToken)
+        localStorage.setItem('refreshToken', data.refreshToken)
         localStorage.setItem('username', form.value.username)
         
-        const userInfo = await getUserInfo(form.value.username)
+        const userInfo = data.userInfo
         if (userInfo) {
           localStorage.setItem('userId', userInfo.userId)
           localStorage.setItem('userStatus', userInfo.userStatus)
@@ -201,19 +206,28 @@ const getUserInfo = async (username) => {
   }
 }
 
-const getSnowflakeStyle = (n) => {
-  const left = Math.random() * 100
-  const delay = Math.random() * 15
-  const duration = 8 + Math.random() * 15
-  const size = 3 + Math.random() * 10
-  const sway = Math.random() * 60 - 30
+const generateSnowflakes = () => {
+  const flakes = []
+  for (let n = 0; n < 40; n++) {
+    flakes.push({
+      left: Math.random() * 100,
+      delay: Math.random() * 15,
+      duration: 8 + Math.random() * 15,
+      size: 3 + Math.random() * 10,
+      sway: Math.random() * 60 - 30
+    })
+  }
+  return flakes
+}
+
+const getSnowflakeStyle = (flake) => {
   return {
-    left: `${left}%`,
-    animationDelay: `${delay}s`,
-    animationDuration: `${duration}s`,
-    width: `${size}px`,
-    height: `${size}px`,
-    '--sway': `${sway}px`
+    left: `${flake.left}%`,
+    animationDelay: `${flake.delay}s`,
+    animationDuration: `${flake.duration}s`,
+    width: `${flake.size}px`,
+    height: `${flake.size}px`,
+    '--sway': `${flake.sway}px`
   }
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="register-page">
     <div class="snow-bg">
-      <div v-for="n in 40" :key="n" class="snowflake" :style="getSnowflakeStyle(n)"></div>
+      <div v-for="(flake, index) in snowflakes" :key="index" class="snowflake" :style="getSnowflakeStyle(flake)"></div>
     </div>
 
     <div class="register-wrapper">
@@ -80,12 +80,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { userApi } from '../../api'
 
 const router = useRouter()
 const loading = ref(false)
+const snowflakes = ref([])
 const form = ref({
   username: '',
   password: '',
@@ -142,21 +143,34 @@ const handleRegister = async () => {
   }
 }
 
-const getSnowflakeStyle = (n) => {
-  const left = Math.random() * 100
-  const delay = Math.random() * 15
-  const duration = 8 + Math.random() * 15
-  const size = 3 + Math.random() * 10
-  const sway = Math.random() * 60 - 30
+const generateSnowflakes = () => {
+  const flakes = []
+  for (let n = 0; n < 40; n++) {
+    flakes.push({
+      left: Math.random() * 100,
+      delay: Math.random() * 15,
+      duration: 8 + Math.random() * 15,
+      size: 3 + Math.random() * 10,
+      sway: Math.random() * 60 - 30
+    })
+  }
+  return flakes
+}
+
+const getSnowflakeStyle = (flake) => {
   return {
-    left: `${left}%`,
-    animationDelay: `${delay}s`,
-    animationDuration: `${duration}s`,
-    width: `${size}px`,
-    height: `${size}px`,
-    '--sway': `${sway}px`
+    left: `${flake.left}%`,
+    animationDelay: `${flake.delay}s`,
+    animationDuration: `${flake.duration}s`,
+    width: `${flake.size}px`,
+    height: `${flake.size}px`,
+    '--sway': `${flake.sway}px`
   }
 }
+
+onMounted(() => {
+  snowflakes.value = generateSnowflakes()
+})
 </script>
 
 <style scoped>

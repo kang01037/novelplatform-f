@@ -2,7 +2,7 @@
   <div class="home-page">
     <!-- 雪花背景 -->
     <div class="snow-bg">
-      <div v-for="n in 50" :key="n" class="snowflake" :style="getSnowflakeStyle(n)"></div>
+      <div v-for="(flake, index) in snowflakes" :key="index" class="snowflake" :style="getSnowflakeStyle(flake)"></div>
     </div>
 
     <!-- 主内容 -->
@@ -46,7 +46,7 @@
             <span>互动评论</span>
           </div>
           <div class="card-snow">
-            <div v-for="n in 6" :key="n" class="mini-snow" :style="getMiniSnowStyle(n)"></div>
+            <div v-for="(mini, index) in miniSnowflakes" :key="index" class="mini-snow" :style="getMiniSnowStyle(mini)"></div>
           </div>
         </div>
 
@@ -65,7 +65,7 @@
             <span>数据统计</span>
           </div>
           <div class="card-snow">
-            <div v-for="n in 6" :key="n" class="mini-snow" :style="getMiniSnowStyle(n)"></div>
+            <div v-for="(mini, index) in miniSnowflakes" :key="index" class="mini-snow" :style="getMiniSnowStyle(mini)"></div>
           </div>
         </div>
 
@@ -84,7 +84,7 @@
             <span>数据监控</span>
           </div>
           <div class="card-snow">
-            <div v-for="n in 6" :key="n" class="mini-snow" :style="getMiniSnowStyle(n)"></div>
+            <div v-for="(mini, index) in miniSnowflakes" :key="index" class="mini-snow" :style="getMiniSnowStyle(mini)"></div>
           </div>
         </div>
       </div>
@@ -98,43 +98,69 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const snowflakes = ref([])
+const miniSnowflakes = ref([])
 
 const goLogin = (role) => {
   router.push({ path: '/login', query: { role } })
 }
 
-const getSnowflakeStyle = (n) => {
-  const left = Math.random() * 100
-  const delay = Math.random() * 15
-  const duration = 8 + Math.random() * 15
-  const size = 4 + Math.random() * 12
-  const sway = Math.random() * 80 - 40
+const generateSnowflakes = () => {
+  const flakes = []
+  for (let n = 0; n < 50; n++) {
+    flakes.push({
+      left: Math.random() * 100,
+      delay: Math.random() * 15,
+      duration: 8 + Math.random() * 15,
+      size: 4 + Math.random() * 12,
+      sway: Math.random() * 80 - 40
+    })
+  }
+  return flakes
+}
+
+const generateMiniSnowflakes = () => {
+  const flakes = []
+  for (let n = 0; n < 6; n++) {
+    flakes.push({
+      left: Math.random() * 100,
+      delay: Math.random() * 10,
+      duration: 5 + Math.random() * 8,
+      size: 3 + Math.random() * 6
+    })
+  }
+  return flakes
+}
+
+const getSnowflakeStyle = (flake) => {
   return {
-    left: `${left}%`,
-    animationDelay: `${delay}s`,
-    animationDuration: `${duration}s`,
-    width: `${size}px`,
-    height: `${size}px`,
-    '--sway': `${sway}px`
+    left: `${flake.left}%`,
+    animationDelay: `${flake.delay}s`,
+    animationDuration: `${flake.duration}s`,
+    width: `${flake.size}px`,
+    height: `${flake.size}px`,
+    '--sway': `${flake.sway}px`
   }
 }
 
-const getMiniSnowStyle = (n) => {
-  const left = Math.random() * 100
-  const delay = Math.random() * 10
-  const duration = 5 + Math.random() * 8
-  const size = 3 + Math.random() * 6
+const getMiniSnowStyle = (flake) => {
   return {
-    left: `${left}%`,
-    animationDelay: `${delay}s`,
-    animationDuration: `${duration}s`,
-    width: `${size}px`,
-    height: `${size}px`
+    left: `${flake.left}%`,
+    animationDelay: `${flake.delay}s`,
+    animationDuration: `${flake.duration}s`,
+    width: `${flake.size}px`,
+    height: `${flake.size}px`
   }
 }
+
+onMounted(() => {
+  snowflakes.value = generateSnowflakes()
+  miniSnowflakes.value = generateMiniSnowflakes()
+})
 </script>
 
 <style scoped>
