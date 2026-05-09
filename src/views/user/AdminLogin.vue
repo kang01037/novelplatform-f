@@ -147,7 +147,7 @@ onMounted(() => {
 <style scoped>
 .admin-login-page {
   min-height: 100vh;
-  background: linear-gradient(170deg, #1a0a2e 0%, #2d1b4e 30%, #3a2560 60%, #4a3570 100%);
+  background: linear-gradient(170deg, #0a1628 0%, #0f2847 30%, #143a63 60%, #1a4d80 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -188,11 +188,11 @@ onMounted(() => {
 }
 
 .form-area {
-  background: rgba(26,10,46,0.9);
+  background: rgba(10,22,40,0.9);
   backdrop-filter: blur(20px);
   border-radius: 28px;
-  border: 1px solid rgba(139,92,246,0.2);
-  box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 40px rgba(139,92,246,0.1);
+  border: 1px solid rgba(26,182,255,0.2);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 40px rgba(26,182,255,0.1);
   padding: 3rem;
 }
 
@@ -205,12 +205,12 @@ onMounted(() => {
   width: 60px;
   height: 60px;
   margin: 0 auto 1rem;
-  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #26b6ff 0%, #4fd1c5 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 25px rgba(139,92,246,0.4);
+  box-shadow: 0 8px 25px rgba(26,182,255,0.3);
 }
 
 .admin-badge svg {
@@ -224,14 +224,14 @@ onMounted(() => {
   font-weight: 700;
   color: #fff;
   margin: 0 0 0.5rem;
-  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
+  background: linear-gradient(135deg, #26b6ff 0%, #4fd1c5 50%, #81e6d9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .form-subtitle {
-  color: rgba(196,181,253,0.5);
+  color: rgba(129,230,217,0.5);
   font-size: 0.9rem;
   margin: 0;
 }
@@ -245,7 +245,7 @@ onMounted(() => {
 .input-group label {
   display: block;
   font-size: 0.85rem;
-  color: rgba(196,181,253,0.7);
+  color: rgba(129,230,217,0.7);
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
@@ -261,14 +261,14 @@ onMounted(() => {
   left: 1rem;
   width: 18px;
   height: 18px;
-  color: rgba(196,181,253,0.3);
+  color: rgba(129,230,217,0.3);
 }
 
 .input-wrapper input {
   width: 100%;
   padding: 0.8rem 1rem 0.8rem 2.8rem;
   background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(139,92,246,0.2);
+  border: 1px solid rgba(26,182,255,0.2);
   border-radius: 12px;
   color: #fff;
   font-size: 0.9rem;
@@ -277,14 +277,14 @@ onMounted(() => {
 }
 
 .input-wrapper input::placeholder {
-  color: rgba(196,181,253,0.25);
+  color: rgba(129,230,217,0.25);
 }
 
 .input-wrapper input:focus {
   outline: none;
-  border-color: rgba(139,92,246,0.5);
+  border-color: rgba(26,182,255,0.5);
   background: rgba(255,255,255,0.08);
-  box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+  box-shadow: 0 0 0 3px rgba(26,182,255,0.1);
 }
 
 .submit-btn {
@@ -300,13 +300,13 @@ onMounted(() => {
 }
 
 .admin-submit {
-  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
-  box-shadow: 0 4px 15px rgba(139,92,246,0.4);
+  background: linear-gradient(135deg, #26b6ff 0%, #4fd1c5 100%);
+  box-shadow: 0 4px 15px rgba(26,182,255,0.3);
 }
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(139,92,246,0.5);
+  box-shadow: 0 8px 25px rgba(26,182,255,0.4);
 }
 
 .submit-btn:disabled {
@@ -323,18 +323,14 @@ onMounted(() => {
 }
 
 .form-footer a {
-  color: rgba(196,181,253,0.5);
+  color: rgba(129,230,217,0.5);
   text-decoration: none;
   font-size: 0.85rem;
   transition: color 0.3s;
 }
 
 .form-footer a:hover {
-  color: #8b5cf6;
-}
-
-.divider-line {
-  color: rgba(196,181,253,0.3);
+  color: #26b6ff;
 }
 
 @media (max-width: 600px) {

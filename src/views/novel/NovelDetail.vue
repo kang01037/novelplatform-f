@@ -216,7 +216,7 @@ import { debounce, throttle } from '../../utils'
 
 const route = useRoute()
 const router = useRouter()
-const novelId = route.params.novelId
+const novelId = parseInt(route.params.novelId)
 const novel = ref(null)
 const lastChapter = ref(null)
 const loading = ref(false)
@@ -354,10 +354,14 @@ const loadData = async () => {
       novelApi.addClick(novelId).catch(() => {})
     } else { error.value = message || '获取详情失败'; return }
 
-    const chapterResponse = await chapterApi.getLatestChapter(novelId)
-    const chapterData = chapterResponse.data
-    if (chapterData.code === 200 || chapterData.message === 'success') {
-      lastChapter.value = chapterData.data
+    try {
+      const chapterResponse = await chapterApi.getLatestChapter(novelId)
+      const chapterData = chapterResponse.data
+      if (chapterData.code === 200 || chapterData.message === 'success') {
+        lastChapter.value = chapterData.data
+      }
+    } catch (e) {
+      console.warn('获取最新章节失败:', e)
     }
     await getComments()
   } catch (err) {
