@@ -77,74 +77,68 @@
         </el-tab-pane>
 
         <el-tab-pane label="小说管理" name="novel">
-          <el-input
-              v-model="searchForm.keyword"
-              placeholder="搜索小说名或作者"
-              style="width: 300px; margin-bottom: 16px"
-              clearable
-              @keyup.enter="handleSearch"
-          >
-            <template #append>
-              <el-button @click="handleSearch">搜索</el-button>
-            </template>
-          </el-input>
-          <el-table :data="novelList" v-loading="loading" stripe style="width: 100%">
-            <el-table-column prop="novelId" label="ID" width="80" />
-            <el-table-column prop="novelName" label="小说名" />
-            <el-table-column prop="authorId" label="作者 ID" width="100" />
-            <el-table-column label="类别" width="100">
-              <template #default="scope">
-                <el-tag>{{ getCategoryName(scope.row.categoryId) }}</el-tag>
+          <div class="search-bar">
+            <el-input
+                v-model="searchForm.keyword"
+                placeholder="搜索小说名或作者"
+                style="width: 300px"
+                clearable
+                @keyup.enter="handleSearch"
+            >
+              <template #append>
+                <el-button @click="handleSearch">搜索</el-button>
               </template>
-            </el-table-column>
-            <el-table-column label="状态" width="100">
-              <template #default="scope">
-                <el-tag :type="scope.row.status === 1 ? 'success' : 'info'">
-                  {{ scope.row.status === 1 ? '连载中' : '已完结' }}
+            </el-input>
+          </div>
+          <div class="novel-grid">
+            <div v-for="novel in novelList" :key="novel.novelId" class="novel-card">
+              <div class="novel-header">
+                <span class="novel-id">ID: {{ novel.novelId }}</span>
+                <el-tag :type="novel.status === 1 ? 'success' : 'info'" size="small">
+                  {{ novel.status === 1 ? '连载中' : '完结' }}
                 </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="字数" width="100">
-              <template #default="scope">
-                {{ scope.row.wordCount || 0 }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="clickCount" label="点击量" width="100" />
-            <el-table-column prop="collectCount" label="收藏量" width="100" />
-            <el-table-column prop="recommendCount" label="推荐数" width="100" />
-            <el-table-column prop="score" label="评分" width="80">
-              <template #default="scope">
-                {{ scope.row.score || 0 }}分
-              </template>
-            </el-table-column>
-            <el-table-column label="最新章节" width="150" show-overflow-tooltip>
-              <template #default="scope">
-                {{ scope.row.lastChapterName || '无' }}
-              </template>
-            </el-table-column>
-            <el-table-column label="创建时间" width="180">
-              <template #default="scope">
-                {{ formatTime(scope.row.createdTime) }}
-              </template>
-            </el-table-column>
-            <el-table-column label="更新时间" width="180">
-              <template #default="scope">
-                {{ formatTime(scope.row.updatedTime) }}
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="100" fixed="right">
-              <template #default="scope">
-                <el-button
-                    size="small"
-                    type="danger"
-                    :icon="Delete"
-                    @click="deleteNovel(scope.row.novelId)"
-                >
+              </div>
+              <h3 class="novel-name">{{ novel.novelName }}</h3>
+              <div class="novel-info">
+                <div class="info-row">
+                  <span class="label">作者 ID：</span>
+                  <span class="value">{{ novel.authorId }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">类别：</span>
+                  <el-tag size="small">{{ getCategoryName(novel.categoryId) }}</el-tag>
+                </div>
+                <div class="info-row">
+                  <span class="label">字数：</span>
+                  <span class="value">{{ novel.wordCount || 0 }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">点击：</span>
+                  <span class="value">{{ novel.clickCount || 0 }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">收藏：</span>
+                  <span class="value">{{ novel.collectCount || 0 }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">评分：</span>
+                  <span class="value">{{ novel.score || 0 }}</span>
+                </div>
+                <div class="info-row full-width">
+                  <span class="label">创建时间：</span>
+                  <span class="value">{{ formatTime(novel.createdTime) }}</span>
+                </div>
+              </div>
+              <div class="novel-actions">
+                <el-button size="small" type="danger" :icon="Delete" @click="deleteNovel(novel.novelId)">
                   删除
                 </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
+              </div>
+            </div>
+            <div v-if="novelList.length === 0" class="empty-tip">
+              暂无小说数据
+            </div>
+          </div>
           <el-pagination
               v-model:current-page="novelPagination.page"
               v-model:page-size="novelPagination.pageSize"
@@ -157,34 +151,36 @@
         </el-tab-pane>
 
         <el-tab-pane label="评论管理" name="comment">
-          <el-input
-              v-model="searchForm.keyword"
-              placeholder="搜索评论内容"
-              style="width: 300px; margin-bottom: 16px"
-              clearable
-              @keyup.enter="handleSearch"
-          >
-            <template #append>
-              <el-button @click="handleSearch">搜索</el-button>
-            </template>
-          </el-input>
-          <el-table :data="commentList" v-loading="loading" stripe style="width: 100%">
-            <el-table-column prop="commentId" label="ID" width="80" />
-            <el-table-column prop="username" label="评论用户" width="120" />
-            <el-table-column prop="nickname" label="用户昵称" width="100" />
-            <el-table-column prop="novelTitle" label="小说名" width="150" />
-            <el-table-column prop="content" label="评论内容" show-overflow-tooltip />
-            <el-table-column label="点赞数" width="80">
+          <div class="search-bar">
+            <el-input
+                v-model="searchForm.keyword"
+                placeholder="搜索评论内容"
+                style="width: 300px"
+                clearable
+                @keyup.enter="handleSearch"
+            >
+              <template #append>
+                <el-button @click="handleSearch">搜索</el-button>
+              </template>
+            </el-input>
+          </div>
+          <div class="table-wrapper">
+            <el-table :data="commentList" v-loading="loading" stripe style="width: 100%">
+            <el-table-column prop="commentId" label="ID" width="60" />
+            <el-table-column prop="username" label="用户" width="80" show-overflow-tooltip />
+            <el-table-column prop="novelTitle" label="小说" width="100" show-overflow-tooltip />
+            <el-table-column prop="content" label="评论内容" min-width="150" show-overflow-tooltip />
+            <el-table-column label="点赞" width="60">
               <template #default="scope">
                 {{ scope.row.likeCount || 0 }}
               </template>
             </el-table-column>
-            <el-table-column label="评论时间" width="180">
+            <el-table-column label="评论时间" width="160">
               <template #default="scope">
                 {{ formatTime(scope.row.createdTime) }}
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="100" fixed="right">
+            <el-table-column label="操作" width="80">
               <template #default="scope">
                 <el-button
                     size="small"
@@ -197,6 +193,7 @@
               </template>
             </el-table-column>
           </el-table>
+          </div>
           <el-pagination
               v-model:current-page="commentPagination.page"
               v-model:page-size="commentPagination.pageSize"
@@ -581,6 +578,116 @@ onMounted(() => {
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 10px;
+}
+
+.table-wrapper .el-table {
+  min-width: 800px;
+}
+
+.search-bar {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.search-bar :deep(.el-input) {
+  margin-right: 30px;
+  width: 270px !important;
+}
+
+.search-bar :deep(.el-input-group__append) {
+  background: rgba(26, 182, 255, 0.1);
+  border-color: rgba(26, 182, 255, 0.3);
+  color: #26b6ff;
+}
+
+.novel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.novel-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s;
+}
+
+.novel-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(26, 182, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.novel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.novel-id {
+  color: rgba(129, 230, 217, 0.5);
+  font-size: 0.85rem;
+}
+
+.novel-name {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  color: #fff;
+  word-break: break-word;
+}
+
+.novel-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.info-row.full-width {
+  width: 100%;
+  flex-basis: 100%;
+}
+
+.info-row .label {
+  color: rgba(129, 230, 217, 0.6);
+}
+
+.info-row .value {
+  color: #fff;
+}
+
+.novel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.empty-tip {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: rgba(168, 216, 234, 0.5);
+  font-size: 1rem;
 }
 
 .card-header {
