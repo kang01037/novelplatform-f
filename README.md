@@ -25,6 +25,12 @@ novelplatform-f/
 ├── src/
 │   ├── api/
 │   │   └── index.js          # Axios 实例 + 模块化 API 接口
+│   ├── components/           # 公共组件
+│   │   ├── SvgIcon.vue      # SVG 图标组件
+│   │   └── management/       # 管理端组件
+│   │       ├── SearchBar.vue     # 搜索栏组件
+│   │       ├── NovelCard.vue     # 小说卡片组件
+│   │       └── Pagination.vue    # 分页组件
 │   ├── router/
 │   │   └── index.js          # 路由配置 + 角色权限守卫
 │   ├── utils/
@@ -40,7 +46,9 @@ novelplatform-f/
 │   │   ├── comment/
 │   │   │   └── CommentList.vue  # 评论列表
 │   │   ├── management/
-│   │   │   └── AdminManage.vue  # 管理员后台
+│   │   │   ├── AdminManage.vue  # 管理员后台主页面
+│   │   │   ├── UserTable.vue    # 用户表格组件
+│   │   │   └── CommentTable.vue # 评论表格组件
 │   │   ├── novel/
 │   │   │   ├── CategoryBrowse.vue   # 分类浏览
 │   │   │   ├── CompletedNovels.vue  # 已完结小说
@@ -99,21 +107,25 @@ npm run preview
 ## 功能模块
 
 ### 读者端
+
 - 浏览小说库、热门推荐、完结小说
 - 分类浏览、关键词搜索
 - 阅读章节、发表评论
 - 收藏小说到书架
+- 查看和管理个人评论
 
 ### 作者端
+
 - 注册成为作者
 - 创建和管理小说作品
 - 编写和编辑章节
 - 查看读者评论
 
 ### 管理员端
+
 - 管理员账户注册与登录
 - 用户管理（查看、删除）
-- 小说管理（查看、删除）
+- 小说管理（卡片式展示、搜索、删除）
 - 评论管理（查看、删除）
 
 ## 角色权限
@@ -165,12 +177,14 @@ npm run preview
 平台提供离线批量导入工具，用于快速导入小说数据。
 
 **使用方式：**
+
 1. 启动前端服务后访问 `http://localhost:5173/batch-import.html`
 2. 配置后端 API 地址
 3. 上传 JSON 格式的小说数据文件
 4. 点击导入，系统会自动逐条创建小说
 
 **JSON 格式示例：**
+
 ```json
 {
   "novels": [
@@ -187,6 +201,7 @@ npm run preview
 ```
 
 **字段说明：**
+
 - `novelName`：小说名称（必填）
 - `authorId`：作者 ID（必填）
 - `categoryId`：分类 ID（必填）
@@ -196,11 +211,24 @@ npm run preview
 - `content`：简介（可选）
 - `novelStatus`：状态（0-连载中，1-已完结，2-暂停）
 
+## 组件设计
+
+管理端采用组件化设计，拆分如下：
+
+| 组件 | 路径 | 说明 |
+|------|------|------|
+| SearchBar | `components/management/SearchBar.vue` | 通用搜索栏，支持 v-model |
+| NovelCard | `components/management/NovelCard.vue` | 小说卡片，展示完整小说信息 |
+| Pagination | `components/management/Pagination.vue` | 通用分页组件 |
+| UserTable | `views/management/UserTable.vue` | 用户数据表格 |
+| CommentTable | `views/management/CommentTable.vue` | 评论数据表格 |
+
 ## 设计风格
 
 - **冰雪主题**：深色渐变背景 + 毛玻璃卡片效果
 - **粒子动画**：动态飘雪特效
 - **响应式布局**：适配多种屏幕尺寸
+- **卡片式管理**：小说管理采用卡片布局，信息展示更完整
 
 ## 后端依赖
 
