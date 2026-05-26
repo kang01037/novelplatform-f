@@ -106,10 +106,11 @@ onMounted(() => {
 const loadUserList = async () => {
   loading.value = true
   try {
-    const res = await userApi.list({ page: 1, pageSize: 100 })
-    if (res.code === 200) {
-      userList.value = res.data.records || []
-      userPagination.total = res.data.total || 0
+    const res = await userApi.getUsers()
+    if (res.data.code === 200) {
+      const list = res.data.data || []
+      userList.value = list
+      userPagination.total = list.length
     }
   } catch (e) {
     console.error(e)
@@ -121,15 +122,20 @@ const loadUserList = async () => {
 const loadNovelList = async () => {
   loading.value = true
   try {
-    const res = await novelApi.list({
-      page: novelPagination.page,
-      pageSize: novelPagination.pageSize,
-      keyword: searchForm.keyword
-    })
-    if (res.code === 200) {
-      novelList.value = res.data.records || []
-      novelPagination.total = res.data.total || 0
+    let list = []
+    if (searchForm.keyword) {
+      const res = await novelApi.searchNovels(searchForm.keyword)
+      if (res.data.code === 200) {
+        list = res.data.data || []
+      }
+    } else {
+      const res = await novelApi.getNovels()
+      if (res.data.code === 200) {
+        list = res.data.data || []
+      }
     }
+    novelList.value = list
+    novelPagination.total = list.length
   } catch (e) {
     console.error(e)
   } finally {
@@ -140,14 +146,10 @@ const loadNovelList = async () => {
 const loadCommentList = async () => {
   loading.value = true
   try {
-    const res = await commentApi.list({
-      page: commentPagination.page,
-      pageSize: commentPagination.pageSize,
-      keyword: searchForm.keyword
-    })
-    if (res.code === 200) {
-      commentList.value = res.data.records || []
-      commentPagination.total = res.data.total || 0
+    const res = await commentApi.getAllComments(commentPagination.page, commentPagination.pageSize)
+    if (res.data.code === 200) {
+      commentList.value = res.data.data || []
+      commentPagination.total = res.data.data ? res.data.data.length : 0
     }
   } catch (e) {
     console.error(e)
@@ -156,15 +158,15 @@ const loadCommentList = async () => {
   }
 }
 
-const loadCategories = async () => {
-  try {
-    const res = await novelApi.categoryList()
-    if (res.code === 200) {
-      categories.value = res.data || []
-    }
-  } catch (e) {
-    console.error(e)
-  }
+const loadCategories = () => {
+  categories.value = [
+    { categoryId: 1, categoryName: '玄幻奇幻' },
+    { categoryId: 2, categoryName: '武侠仙侠' },
+    { categoryId: 3, categoryName: '都市言情' },
+    { categoryId: 4, categoryName: '科幻灵异' },
+    { categoryId: 5, categoryName: '历史军事' },
+    { categoryId: 6, categoryName: '游戏竞技' }
+  ]
 }
 
 const handleTabChange = (tab) => {
@@ -204,12 +206,12 @@ const handleCommentPageChange = ({ page }) => {
 const deleteUser = async (userId) => {
   try {
     await ElMessageBox.confirm('确定要删除该用户吗？', '提示', { type: 'warning' })
-    const res = await userApi.delete(userId)
-    if (res.code === 200) {
+    const res = await userApi.deleteUser(userId)
+    if (res.data.code === 200) {
       ElMessage.success('删除成功')
       loadUserList()
     } else {
-      ElMessage.error(res.message || '删除失败')
+      ElMessage.error(res.data.message || '删除失败')
     }
   } catch (e) {
     if (e !== 'cancel') console.error(e)
@@ -219,12 +221,12 @@ const deleteUser = async (userId) => {
 const deleteNovel = async (novelId) => {
   try {
     await ElMessageBox.confirm('确定要删除该小说吗？', '提示', { type: 'warning' })
-    const res = await novelApi.delete(novelId)
-    if (res.code === 200) {
+    const res = await novelApi.deleteNovel(novelId)
+    if (res.data.code === 200) {
       ElMessage.success('删除成功')
       loadNovelList()
     } else {
-      ElMessage.error(res.message || '删除失败')
+      ElMessage.error(res.data.message || '删除失败')
     }
   } catch (e) {
     if (e !== 'cancel') console.error(e)
@@ -234,12 +236,12 @@ const deleteNovel = async (novelId) => {
 const deleteComment = async (commentId) => {
   try {
     await ElMessageBox.confirm('确定要删除该评论吗？', '提示', { type: 'warning' })
-    const res = await commentApi.delete(commentId)
-    if (res.code === 200) {
+    const res = await commentApi.deleteComment(commentId)
+    if (res.data.code === 200) {
       ElMessage.success('删除成功')
       loadCommentList()
     } else {
-      ElMessage.error(res.message || '删除失败')
+      ElMessage.error(res.data.message || '删除失败')
     }
   } catch (e) {
     if (e !== 'cancel') console.error(e)

@@ -13,13 +13,23 @@
           <span class="novel-name">{{ novelInfo.novelName }}</span>
         </div>
       </div>
-      <router-link :to="`/writer/chapter/create/${novelId}`" class="create-btn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        新建章节
-      </router-link>
+      <div class="nav-actions">
+        <button @click="openAIAssist" class="ai-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          AI协助
+        </button>
+        <router-link :to="`/writer/chapter/create/${novelId}`" class="create-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          新建章节
+        </router-link>
+      </div>
     </div>
 
     <!-- 主要内容区域 -->
@@ -34,7 +44,7 @@
       <!-- 空状态 -->
       <div v-else-if="chapters.length === 0" class="empty-state">
         <div class="empty-content">
-          <div class="empty-icon">📝</div>
+          <div class="empty-icon"></div>
           <h2 class="empty-title">暂无章节</h2>
           <p class="empty-description">开始创作您的第一部作品吧！</p>
           <router-link :to="`/writer/chapter/create/${novelId}`" class="empty-action">
@@ -147,6 +157,10 @@ const deleteChapter = async (chapterId) => {
   }
 }
 
+const openAIAssist = () => {
+  window.open('http://localhost:5174', '_blank')
+}
+
 const goBack = () => {
   window.history.back()
 }
@@ -216,6 +230,37 @@ onMounted(() => {
 .novel-name {
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ai-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+  transition: all 0.3s ease;
+}
+
+.ai-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+}
+
+.ai-btn svg {
+  stroke: currentColor;
 }
 
 .create-btn {
@@ -456,8 +501,13 @@ onMounted(() => {
     gap: 1rem;
   }
 
-  .create-btn {
+  .nav-actions {
     width: 100%;
+  }
+
+  .ai-btn,
+  .create-btn {
+    flex: 1;
     justify-content: center;
   }
 }

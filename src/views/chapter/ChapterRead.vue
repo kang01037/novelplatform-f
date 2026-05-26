@@ -9,8 +9,8 @@
       </div>
       <div class="header-right">
         <button class="btn fullscreen-btn" @click="toggleFullscreen">
-          <span v-if="!isFullscreen">🔍</span>
-          <span v-else>🔎</span>
+          <span v-if="!isFullscreen"></span>
+          <span v-else></span>
           {{ isFullscreen ? '退出全屏' : '沉浸式阅读' }}
         </button>
         <button class="btn" @click="showSettings = !showSettings">设置</button>
